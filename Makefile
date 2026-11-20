@@ -1,4 +1,4 @@
-.PHONY: git-pull rm-latest-commit db-up db-down
+.PHONY: git-pull rm-latest-commit db-up db-down api-run api-tidy
 
 git-pull:
 	@echo "Fetching and pulling latest changes from remote repository..."
@@ -20,3 +20,10 @@ db-down:
 	@echo "Stopping the PostgreSQL database using Docker Compose..."
 	docker compose down db
 	@echo "Done!"
+
+api-run:
+	@echo "Starting Go Fiber API..."
+	cd api && go run cmd/server/main.go
+
+api-tidy:
+	cd api && go mod tidy
