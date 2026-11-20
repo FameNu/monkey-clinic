@@ -1,0 +1,8 @@
+name: local
+variables:
+  - name: baseUrl
+    value: http://localhost:8080
+  - name: loginEmail
+    value: admin@clinic.com
+  - name: loginPassword
+    value: admin1234
