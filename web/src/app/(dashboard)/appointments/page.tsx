@@ -32,6 +32,7 @@ import EmptyState from '@/components/common/StateViews/EmptyState'
 import ErrorState from '@/components/common/StateViews/ErrorState'
 import LoadingState from '@/components/common/StateViews/LoadingState'
 import { CreateAppointmentModal } from '@/components/appointments/CreateAppointmentModal'
+import DashboardAuthGuard from '@/components/auth/DashboardAuthGuard'
 
 const getTodayLocalString = () => {
   const today = new Date()
@@ -39,6 +40,14 @@ const getTodayLocalString = () => {
 }
 
 export default function AppointmentsPage() {
+  return (
+    <DashboardAuthGuard>
+      <AppointmentsContent />
+    </DashboardAuthGuard>
+  )
+}
+
+function AppointmentsContent() {
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
 
