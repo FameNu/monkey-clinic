@@ -1,8 +1,8 @@
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { useAuthStore } from '@/store/useAuthStore'
 import { redirect } from 'next/navigation'
 
-export const apiClient = axios.create({
+export const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     'Content-Type': 'application/json',
