@@ -1,0 +1,28 @@
+info:
+  name: 02-get-patient-history
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/patients/{{patientId}}/history"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+  body:
+    type: none
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("patient history contains the completed appointment and record", function() {
+          expect(res.status).to.equal(200);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data).to.be.an("array");
+          const completedAppointment = res.body.data.find((item) => item.id === bru.getVar("appointmentId"));
+          expect(completedAppointment).to.exist;
+          expect(completedAppointment.status).to.equal("completed");
+          expect(completedAppointment.medical_record.id).to.equal(bru.getVar("medicalRecordId"));
+        });

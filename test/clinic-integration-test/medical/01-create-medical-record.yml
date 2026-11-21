@@ -1,0 +1,51 @@
+info:
+  name: 01-create-medical-record
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/medical-records"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "appointment_id": "{{appointmentId}}",
+        "diagnosis": "Acute viral upper respiratory infection",
+        "symptoms": "Cough and sore throat",
+        "treatment_notes": "Rest and fluids",
+        "prescriptions": [
+          {
+            "medication_id": "{{medicationId}}",
+            "quantity": 2,
+            "dosage_instruction": "Take one tablet twice daily"
+          }
+        ],
+        "override_allergy_warning": false
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.status === 201 && res.body?.data?.id) {
+          bru.setVar("medicalRecordId", res.body.data.id);
+        }
+    - type: tests
+      code: |-
+        test("medical record and prescription are created for the appointment", function() {
+          expect(res.status).to.equal(201);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data.id).to.be.a("string").and.not.empty;
+          expect(res.body.data.appointment_id).to.equal(bru.getVar("appointmentId"));
+          expect(res.body.data.diagnosis).to.equal("Acute viral upper respiratory infection");
+          expect(res.body.data.prescriptions).to.have.lengthOf(1);
+          expect(res.body.data.prescriptions[0].medication_id).to.equal(bru.getVar("medicationId"));
+          expect(res.body.data.prescriptions[0].unit_price).to.equal(2);
+        });

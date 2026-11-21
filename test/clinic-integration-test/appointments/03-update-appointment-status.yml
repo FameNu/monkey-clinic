@@ -15,7 +15,7 @@ http:
     type: json
     data: |-
       {
-        "status": "cancelled"
+        "status": "checked_in"
       }
   auth: inherit
 

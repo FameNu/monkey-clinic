@@ -1,0 +1,32 @@
+info:
+  name: 01-get-seeded-medication
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/medications?search=Paracetamol"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+  body:
+    type: none
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const medication = res.body?.medications?.find((item) => item.code === "MED-001");
+        if (res.status === 200 && medication?.id) {
+          bru.setVar("medicationId", medication.id);
+        }
+    - type: tests
+      code: |-
+        test("medication search returns the seeded prescription medicine", function() {
+          expect(res.status).to.equal(200);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.medications).to.be.an("array");
+          expect(res.body.medications.some((item) => item.code === "MED-001")).to.equal(true);
+          expect(bru.getVar("medicationId")).to.be.a("string").and.not.empty;
+        });

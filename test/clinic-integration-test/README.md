@@ -36,9 +36,16 @@ Covered routes:
 - `GET /api/v1/patients`
 - `GET /api/v1/patients/:id`
 - `POST /api/v1/patients/:id/allergies`
+- `GET /api/v1/medications`
 - `POST /api/v1/appointments`
 - `GET /api/v1/appointments`
 - `PATCH /api/v1/appointments/:id/status`
+- `POST /api/v1/medical-records`
+- `GET /api/v1/patients/:id/history`
+- `GET /api/v1/invoices`
+- `POST /api/v1/invoices`
+- `PATCH /api/v1/invoices/:id/pay`
+- `GET /api/v1/dashboard/summary`
 
 Collection folders:
 
@@ -47,4 +54,8 @@ Collection folders:
 - `users`
 - `doctors`
 - `patients`
+- `medications`
 - `appointments`
+- `medical`
+- `invoices`
+- `dashboard`

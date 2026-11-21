@@ -1,0 +1,27 @@
+info:
+  name: 02-get-all-invoices
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/invoices?status=unpaid"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+  body:
+    type: none
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("invoice list includes the unpaid invoice created in this run", function() {
+          expect(res.status).to.equal(200);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data).to.be.an("array");
+          const invoice = res.body.data.find((item) => item.id === bru.getVar("invoiceId"));
+          expect(invoice).to.exist;
+          expect(invoice.payment_status).to.equal("unpaid");
+        });

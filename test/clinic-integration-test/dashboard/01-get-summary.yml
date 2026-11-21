@@ -1,0 +1,29 @@
+info:
+  name: 01-get-summary
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/dashboard/summary"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+  body:
+    type: none
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("dashboard summary includes the clinic totals", function() {
+          expect(res.status).to.equal(200);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data.date).to.match(/^\d{4}-\d{2}-\d{2}$/);
+          expect(res.body.data.total_patients).to.be.at.least(1);
+          expect(res.body.data.today_appointments).to.be.a("number");
+          expect(res.body.data.completed_today).to.be.a("number");
+          expect(res.body.data.low_stock_meds).to.be.a("number");
+          expect(res.body.data.today_revenue).to.be.a("number");
+        });
