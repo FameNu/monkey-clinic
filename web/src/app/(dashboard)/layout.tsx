@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ReactNode, useEffect, useState, useSyncExternalStore } from 'react'
+import { ReactNode, useState, useSyncExternalStore } from 'react'
 
 import { useAuthStore } from '@/store/useAuthStore'
 import { UserRole } from '@/types'
@@ -31,8 +31,6 @@ import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import MedicationOutlinedIcon from '@mui/icons-material/MedicationOutlined'
 import MenuIcon from '@mui/icons-material/Menu'
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined'
-
-import LoadingState from '@/components/common/StateViews/LoadingState'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -83,7 +81,9 @@ const NAV_ITEMS: NavItem[] = [
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, isAuthenticated, logout } = useAuthStore()
+  const user = useAuthStore((state) => state.user)
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  const logout = useAuthStore((state) => state.logout)
 
   const [mobileOpen, setMobileOpen] = useState(false)
   const hydrated = useSyncExternalStore(
@@ -91,12 +91,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     () => true,
     () => false,
   )
-
-  useEffect(() => {
-    if (hydrated && !isAuthenticated) {
-      router.replace('/login')
-    }
-  }, [hydrated, isAuthenticated, router])
 
   if (!user || !isAuthenticated || !hydrated) {
     return (
@@ -108,7 +102,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           justifyContent: 'center',
         }}
       >
-        <LoadingState message='กำลังตรวจสอบสิทธิ์การเข้าใช้งาน...' />
+        {children}
       </Box>
     )
   }
