@@ -40,6 +40,10 @@ func New(db *gorm.DB) *fiber.App {
 	staffHandler := handler.NewStaffHandler(db)
 	patientHandler := handler.NewPatientHandler(db)
 	appointmentHandler := handler.NewAppointmentHandler(db)
+	medicationHandler := handler.NewMedicationHandler(db)
+	clinicalHandler := handler.NewClinicalHandler(db)
+	invoiceHandler := handler.NewInvoiceHandler(db)
+	dashboardHandler := handler.NewDashboardHandler(db)
 
 	protected.Post("/users", middleware.RequireRoles("admin"), staffHandler.CreateUser)
 	protected.Post("/doctors", middleware.RequireRoles("admin"), staffHandler.CreateDoctor)
@@ -54,6 +58,19 @@ func New(db *gorm.DB) *fiber.App {
 	protected.Post("/appointments", middleware.RequireRoles("admin", "receptionist"), appointmentHandler.CreateAppointment)
 	protected.Get("/appointments", appointmentHandler.GetAppointments)
 	protected.Patch("/appointments/:id/status", middleware.RequireRoles("admin", "doctor", "receptionist"), appointmentHandler.UpdateStatus)
+
+	protected.Get("/medications", medicationHandler.GetMedications)
+	protected.Post("/medications", middleware.RequireRoles("admin"), medicationHandler.CreateMedication)
+	protected.Patch("/medications/:id/restock", middleware.RequireRoles("admin", "receptionist"), medicationHandler.RestockMedication)
+
+	protected.Post("/medical-records", middleware.RequireRoles("admin", "doctor"), clinicalHandler.CreateMedicalRecord)
+	protected.Get("/patients/:id/history", clinicalHandler.GetPatientHistory)
+
+	protected.Get("/invoices", invoiceHandler.GetInvoices)
+	protected.Post("/invoices", middleware.RequireRoles("admin", "receptionist"), invoiceHandler.CreateInvoice)
+	protected.Patch("/invoices/:id/pay", middleware.RequireRoles("admin", "receptionist"), invoiceHandler.PayInvoice)
+
+	protected.Get("/dashboard/summary", dashboardHandler.GetSummary)
 
 	return app
 }
