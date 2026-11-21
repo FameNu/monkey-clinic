@@ -1,0 +1,39 @@
+info:
+  name: 03-add-doctor-schedule
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/doctors/{{doctorId}}/schedule"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "day_of_week": 1,
+        "start_time": "09:00",
+        "end_time": "16:00",
+        "slot_duration_min": 30
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.status === 201 && res.body?.data?.id) {
+          bru.setVar("doctorScheduleId", res.body.data.id);
+        }
+    - type: tests
+      code: |-
+        test("doctor schedule is created", function() {
+          expect(res.status).to.equal(201);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data.doctor_id).to.equal(bru.getVar("doctorId"));
+          expect(res.body.data.slot_duration_min).to.equal(30);
+        });

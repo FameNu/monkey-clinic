@@ -1,0 +1,56 @@
+info:
+  name: 01-create-appointment
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/appointments"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "patient_id": "{{patientId}}",
+        "doctor_id": "{{doctorId}}",
+        "appointment_date": "{{appointmentDate}}",
+        "start_time": "{{appointmentStart}}",
+        "end_time": "{{appointmentEnd}}",
+        "reason": "Bruno integration appointment"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const now = new Date();
+        const minuteSlot = Math.floor(Date.now() / 60000) % (365 * 24 * 60);
+        const dayOffset = Math.floor(minuteSlot / 1381);
+        const minuteOfDay = minuteSlot % 1381;
+        const firstAppointmentDay = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+        const start = new Date(firstAppointmentDay + dayOffset * 24 * 60 * 60000 + minuteOfDay * 60000);
+        const end = new Date(start.getTime() + 30 * 60000);
+        const pad = (value) => String(value).padStart(2, "0");
+        bru.setVar("appointmentDate", start.toISOString().slice(0, 10));
+        bru.setVar("appointmentStart", `${pad(start.getUTCHours())}:${pad(start.getUTCMinutes())}`);
+        bru.setVar("appointmentEnd", `${pad(end.getUTCHours())}:${pad(end.getUTCMinutes())}`);
+    - type: after-response
+      code: |-
+        if (res.status === 201 && res.body?.data?.id) {
+          bru.setVar("appointmentId", res.body.data.id);
+        }
+    - type: tests
+      code: |-
+        test("appointment is created for the selected patient and doctor", function() {
+          expect(res.status).to.equal(201);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data.id).to.be.a("string").and.not.empty;
+          expect(res.body.data.patient_id).to.equal(bru.getVar("patientId"));
+          expect(res.body.data.doctor_id).to.equal(bru.getVar("doctorId"));
+          expect(res.body.data.status).to.equal("scheduled");
+        });

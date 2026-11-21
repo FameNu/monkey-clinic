@@ -1,0 +1,25 @@
+info:
+  name: 02-get-all-patients
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/patients?search=Bruno%20Integration%20Patient"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+  body:
+    type: none
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("patient search returns the patient created in this run", function() {
+          expect(res.status).to.equal(200);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.data.some((patient) => patient.id === bru.getVar("patientId"))).to.equal(true);
+        });

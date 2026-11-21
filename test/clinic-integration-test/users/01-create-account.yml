@@ -1,0 +1,36 @@
+info:
+  name: 01-create-account
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/users"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "email": "bruno-staff-{{$timestamp}}@example.test",
+        "password": "bruno-test-password",
+        "prefix": "Ms.",
+        "full_name": "Bruno Integration Receptionist",
+        "role": "receptionist"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("staff user is created", function() {
+          expect(res.status).to.equal(201);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data.role).to.equal("receptionist");
+          expect(res.body.data.is_active).to.equal(true);
+          expect(res.body.data).to.not.have.property("password");
+        });

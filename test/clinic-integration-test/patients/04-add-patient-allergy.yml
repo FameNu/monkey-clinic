@@ -1,0 +1,32 @@
+info:
+  name: 04-add-patient-allergy
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/patients/{{patientId}}/allergies"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "medication_id": "00000000-0000-0000-0000-000000000001",
+        "reaction_note": "Bruno integration test: unknown medication",
+        "severity": "mild"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("allergy endpoint rejects an unknown medication", function() {
+          expect(res.status).to.equal(400);
+          expect(res.body.status).to.equal("error");
+          expect(res.body.message).to.include("Failed to add allergy");
+        });

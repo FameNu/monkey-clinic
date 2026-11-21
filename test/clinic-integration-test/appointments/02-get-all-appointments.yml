@@ -1,0 +1,25 @@
+info:
+  name: 02-get-all-appointments
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: "{{baseUrl}}/api/v1/appointments?doctor_id={{doctorId}}&date={{appointmentDate}}"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+  body:
+    type: none
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("appointment list includes the appointment created in this run", function() {
+          expect(res.status).to.equal(200);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.data.some((appointment) => appointment.id === bru.getVar("appointmentId"))).to.equal(true);
+        });

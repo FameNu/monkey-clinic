@@ -1,0 +1,43 @@
+info:
+  name: 01-create-patient
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/api/v1/patients"
+  headers:
+    - name: Authorization
+      value: "Bearer {{authToken}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "prefix": "Ms.",
+        "full_name": "Bruno Integration Patient {{$timestamp}}",
+        "phone": "09{{$timestamp}}",
+        "date_of_birth": "1990-04-12",
+        "gender": "female",
+        "blood_type": "O",
+        "chronic_diseases": ""
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        if (res.status === 201 && res.body?.data?.id) {
+          bru.setVar("patientId", res.body.data.id);
+        }
+    - type: tests
+      code: |-
+        test("patient is created with a generated health number", function() {
+          expect(res.status).to.equal(201);
+          expect(res.body.status).to.equal("success");
+          expect(res.body.data.id).to.be.a("string").and.not.empty;
+          expect(res.body.data.hn_code).to.match(/^HN-\d{8}$/);
+          expect(res.body.data.full_name).to.include("Bruno Integration Patient");
+        });
