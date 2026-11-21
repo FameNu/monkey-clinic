@@ -21,3 +21,26 @@ export interface Appointment {
   status: AppointmentStatus
   reason: string
 }
+
+export interface DashboardSummary {
+  date: string
+  total_patients: number
+  today_appointments: number
+  completed_today: number
+  low_stock_meds: number
+  today_revenue: number
+}
+
+export interface CreateAppointmentRequest {
+  patient_id: string
+  doctor_id: string
+  appointment_date: string // YYYY-MM-DD
+  start_time: string // HH:MM
+  end_time: string // HH:MM
+  reason?: string
+}
+
+export interface AppointmentFilters {
+  date?: string // YYYY-MM-DD
+  status?: AppointmentStatus
+}
