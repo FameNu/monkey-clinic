@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { useAuthStore } from '@/store/useAuthStore'
-import { apiClient } from '@/lib/axios'
 
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import { Alert, Box, Button, Card, CardContent, Container, IconButton, InputAdornment, TextField, Typography } from '@mui/material'
@@ -12,31 +11,21 @@ import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 export default function LoginPage() {
   const router = useRouter()
-  const setAuth = useAuthStore((state) => state.setAuth)
+  const login = useAuthStore((state) => state.login)
+  const clearLoginError = useAuthStore((state) => state.clearLoginError)
+  const loading = useAuthStore((state) => state.isLoading)
+  const error = useAuthStore((state) => state.loginError)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-    setLoading(true)
-
     try {
-      const res = await apiClient.post('/auth/login', { email, password })
-      const { token, user } = res.data.data
-      setAuth(token, user)
+      await login(email, password)
       router.push('/dashboard')
-    } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง'
-      setError(message)
-    } finally {
-      setLoading(false)
+    } catch {
+      // The auth store exposes the login error for this page to render.
     }
   }
 
@@ -77,7 +66,10 @@ export default function LoginPage() {
                 label='อีเมล (Email)'
                 type='email'
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  clearLoginError()
+                  setEmail(e.target.value)
+                }}
                 required
                 fullWidth
                 autoFocus
@@ -86,7 +78,10 @@ export default function LoginPage() {
                 label='รหัสผ่าน (Password)'
                 type={showPassword ? 'text' : 'password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  clearLoginError()
+                  setPassword(e.target.value)
+                }}
                 required
                 fullWidth
                 slotProps={{
