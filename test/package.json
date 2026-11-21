@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "test:api": "cd clinic-integration-test && bru run --env local"
+    "test:api": "cd clinic-integration-test && bru run --env test -r"
   },
   "devDependencies": {
     "@usebruno/cli": "4.3.0"

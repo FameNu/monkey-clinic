@@ -29,8 +29,7 @@ api-tidy:
 	cd api && go mod tidy
 
 bruno-setup:
-	npm ci
-	cd test/clinic-integration-test && npm ci
+	npm --prefix test ci
 
 bruno-test:
-	cd test && npm run test:api
+	cd api && go run ./cmd/brunotest
