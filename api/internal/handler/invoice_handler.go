@@ -143,7 +143,7 @@ func (h *InvoiceHandler) PayInvoice(c *fiber.Ctx) error {
 
 func (h *InvoiceHandler) GetInvoices(c *fiber.Ctx) error {
 	var invoices []models.Invoice
-	query := h.db.Order("creaded_at desc")
+	query := h.db.Order("created_at desc")
 	if status := c.Query("status"); status != "" {
 		query = query.Where("payment_status = ?", status)
 	}
