@@ -1,0 +1,11 @@
+{
+  "name": "clinic-integration-tests",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "test:api": "cd clinic-integration-test && bru run --env local"
+  },
+  "devDependencies": {
+    "@usebruno/cli": "4.3.0"
+  }
+}

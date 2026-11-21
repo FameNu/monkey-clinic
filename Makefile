@@ -1,4 +1,4 @@
-.PHONY: git-pull rm-latest-commit db-up db-down api-run api-tidy
+.PHONY: git-pull rm-latest-commit db-up db-down api-run api-tidy bruno-setup bruno-test
 
 git-pull:
 	@echo "Fetching and pulling latest changes from remote repository..."
@@ -27,3 +27,10 @@ api-run:
 
 api-tidy:
 	cd api && go mod tidy
+
+bruno-setup:
+	npm ci
+	cd test/clinic-integration-test && npm ci
+
+bruno-test:
+	cd test && npm run test:api
