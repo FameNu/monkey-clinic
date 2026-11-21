@@ -40,7 +40,9 @@ export interface CreateAppointmentRequest {
   reason?: string
 }
 
+export type AppointmentStatusFilter = AppointmentStatus | ''
+
 export interface AppointmentFilters {
   date?: string // YYYY-MM-DD
-  status?: AppointmentStatus
+  status?: AppointmentStatusFilter
 }

@@ -2,8 +2,8 @@ import { apiClient } from '@/lib/axios'
 import {
   Appointment,
   AppointmentStatus,
-  CreateAppointmentRequest,
   AppointmentFilters,
+  CreateAppointmentRequest,
 } from '@/types'
 
 export const appointmentApi = () => {
@@ -12,8 +12,7 @@ export const appointmentApi = () => {
   ): Promise<Appointment[]> => {
     const params = new URLSearchParams()
     if (filters?.date) params.append('date', filters.date)
-    if (filters?.status)
-      params.append('status', filters.status)
+    if (filters?.status) params.append('status', filters.status)
 
     const query = params.toString()
     const url = query ? `/appointments?${query}` : '/appointments'
