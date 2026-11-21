@@ -1,5 +1,5 @@
 info:
-  name: Get Current User
+  name: 02-get-me
   type: http
   seq: 2
 
