@@ -12,13 +12,21 @@ import (
 )
 
 func ConnectDB() *gorm.DB {
+	db, err := OpenDB()
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+	return db
+}
+
+func OpenDB() (*gorm.DB, error) {
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
 		host := getEnv("POSTGRES_HOST", "localhost")
 		port := getEnv("POSTGRES_PORT", "5432")
 		user := getEnv("POSTGRES_USER", "postgres")
 		password := getEnv("POSTGRES_PASSWORD", "password")
-		dbname := getEnv("POSTGRES_DB", "clinic")
+		dbname := getEnv("DB_NAME", getEnv("POSTGRES_DB", "clinic"))
 
 		dsn = fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Bangkok", host, port, user, password, dbname)
 	}
@@ -29,7 +37,7 @@ func ConnectDB() *gorm.DB {
 	}), &gorm.Config{})
 
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
 	if err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error; err != nil {
@@ -50,24 +58,41 @@ func ConnectDB() *gorm.DB {
 	)
 
 	if err != nil {
-		log.Fatalf("Failed to auto-migrate database: %v", err)
+		closeDB(db)
+		return nil, fmt.Errorf("failed to auto-migrate database: %w", err)
 	}
 
 	appEnv := getEnv("APP_ENV", "development")
 	if appEnv == "development" {
-		seedDevData(db)
+		err = seedDevData(db)
 	} else if appEnv == "production" {
-		bootstrapProdAdmin(db)
+		err = bootstrapProdAdmin(db)
+	}
+	if err != nil {
+		closeDB(db)
+		return nil, err
 	}
 
-	return db
+	return db, nil
 }
 
-func seedDevData(db *gorm.DB) {
+func closeDB(db *gorm.DB) {
+	sqlDB, err := db.DB()
+	if err == nil {
+		_ = sqlDB.Close()
+	}
+}
+
+func seedDevData(db *gorm.DB) error {
 	var userCount int64
-	db.Model(&models.User{}).Count(&userCount)
+	if err := db.Model(&models.User{}).Count(&userCount).Error; err != nil {
+		return fmt.Errorf("failed to count users: %w", err)
+	}
 	if userCount == 0 {
-		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("admin1234"), bcrypt.DefaultCost)
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("admin1234"), bcrypt.DefaultCost)
+		if err != nil {
+			return fmt.Errorf("failed to hash development admin password: %w", err)
+		}
 		admin := models.User{
 			Email:        "admin@clinic.com",
 			PasswordHash: string(hashedPassword),
@@ -76,28 +101,37 @@ func seedDevData(db *gorm.DB) {
 			Role:         "admin",
 			IsActive:     true,
 		}
-		db.Create(&admin)
+		if err := db.Create(&admin).Error; err != nil {
+			return fmt.Errorf("failed to seed development admin: %w", err)
+		}
 		log.Println("[DEV] Seeded default admin: admin@clinic.com / admin1234")
 	}
 
 	var medCount int64
-	db.Model(&models.Medication{}).Count(&medCount)
+	if err := db.Model(&models.Medication{}).Count(&medCount).Error; err != nil {
+		return fmt.Errorf("failed to count medications: %w", err)
+	}
 	if medCount == 0 {
 		meds := []models.Medication{
 			{Code: "MED-001", Name: "Paracetamol 500mg", GenericName: "Paracetamol", Unit: "เม็ด", PricePerUnit: 2.00, StockQuantity: 500, MinStockAlert: 50},
 			{Code: "MED-002", Name: "Amoxicillin 500mg", GenericName: "Amoxicillin", Unit: "แคปซูล", PricePerUnit: 8.00, StockQuantity: 200, MinStockAlert: 30},
 			{Code: "MED-003", Name: "Ibuprofen 400mg", GenericName: "Ibuprofen", Unit: "เม็ด", PricePerUnit: 5.00, StockQuantity: 150, MinStockAlert: 20},
 		}
-		db.Create(&meds)
+		if err := db.Create(&meds).Error; err != nil {
+			return fmt.Errorf("failed to seed development medications: %w", err)
+		}
 		log.Println("[DEV] Seeded initial medications")
 	}
+	return nil
 }
 
-func bootstrapProdAdmin(db *gorm.DB) {
+func bootstrapProdAdmin(db *gorm.DB) error {
 	var adminCount int64
-	db.Model(&models.User{}).Where("role = ?", "admin").Count(&adminCount)
+	if err := db.Model(&models.User{}).Where("role = ?", "admin").Count(&adminCount).Error; err != nil {
+		return fmt.Errorf("failed to count administrators: %w", err)
+	}
 	if adminCount > 0 {
-		return // Admin already exists, no need to bootstrap
+		return nil // Admin already exists, no need to bootstrap
 	}
 
 	email := os.Getenv("INITIAL_ADMIN_EMAIL")
@@ -107,12 +141,12 @@ func bootstrapProdAdmin(db *gorm.DB) {
 
 	if email == "" || password == "" {
 		log.Println("WARN: No admin found and INITIAL_ADMIN_EMAIL/PASSWORD not set in production")
-		return
+		return nil
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		log.Fatal("Failed to hash initial admin password:", err)
+		return fmt.Errorf("failed to hash initial admin password: %w", err)
 	}
 
 	admin := models.User{
@@ -125,9 +159,10 @@ func bootstrapProdAdmin(db *gorm.DB) {
 	}
 
 	if err := db.Create(&admin).Error; err != nil {
-		log.Fatal("Failed to bootstrap production admin:", err)
+		return fmt.Errorf("failed to bootstrap production admin: %w", err)
 	}
 	log.Printf("Bootstrapped production admin: %s", email)
+	return nil
 }
 
 func getEnv(key, defaultValue string) string {
