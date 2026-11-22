@@ -26,7 +26,7 @@ import LoadingState from '@/components/common/StateViews/LoadingState'
 
 export default function DoctorsPage() {
   return (
-    <DashboardAuthGuard>
+    <DashboardAuthGuard allowedRoles={['admin', 'receptionist', 'doctor']}>
       <DoctorsContent />
     </DashboardAuthGuard>
   )

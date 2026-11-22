@@ -41,7 +41,7 @@ const TABLE_HEADERS = [
 
 export default function InvoicesPage() {
   return (
-    <DashboardAuthGuard>
+    <DashboardAuthGuard allowedRoles={['admin', 'receptionist']}>
       <InvoiceContent />
     </DashboardAuthGuard>
   )

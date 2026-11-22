@@ -29,12 +29,21 @@ import {
   PrescriptionBuilder,
 } from '@/components/examination/PrescriptionBuilder'
 import { formatStatus } from '@/lib/helper/textFormat'
+import DashboardAuthGuard from '@/components/auth/DashboardAuthGuard'
 
 interface PageProps {
   params: Promise<{ id: string }>
 }
 
 export default function ExaminationPage({ params }: PageProps) {
+  return (
+    <DashboardAuthGuard allowedRoles={['admin', 'doctor']}>
+      <ExaminationContent params={params} />
+    </DashboardAuthGuard>
+  )
+}
+
+function ExaminationContent({ params }: PageProps) {
   const { id: appointmentId } = use(params)
   const router = useRouter()
 

@@ -41,7 +41,7 @@ const getTodayLocalString = () => {
 
 export default function AppointmentsPage() {
   return (
-    <DashboardAuthGuard>
+    <DashboardAuthGuard allowedRoles={['admin', 'doctor', 'receptionist']}>
       <AppointmentsContent />
     </DashboardAuthGuard>
   )
