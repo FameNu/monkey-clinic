@@ -33,7 +33,6 @@ func (h *ClinicalHandler) CreateMedicalRecord(c *fiber.Ctx) error {
 	var createdRecord models.MedicalRecord
 
 	err := h.db.Transaction(func(tx *gorm.DB) error {
-		// 1. ดึงข้อมูลนัดหมายพร้อมประวัติแพ้ยาของคนไข้
 		var appointment models.Appointment
 		if err := tx.Preload("Patient.Allergies.Medication").First(&appointment, "id = ?", req.AppointmentID).Error; err != nil {
 			return fiber.NewError(fiber.StatusNotFound, "Appointment not found")
