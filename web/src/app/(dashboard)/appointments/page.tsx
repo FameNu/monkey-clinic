@@ -59,6 +59,12 @@ function AppointmentsContent() {
     updateAppointmentStatus,
   } = useAppointmentStore()
 
+  const [selectedDate, setSelectedDate] = useState(getTodayLocalString)
+  const [statusFilter, setStatusFilter] = useState<AppointmentStatusFilter>('')
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [openCreateModal, setOpenCreateModal] = useState(false)
+
+  const loadAppointments = useCallback(() => {
     fetchAppointments({ date: selectedDate, status: statusFilter })
   }, [fetchAppointments, selectedDate, statusFilter])
 
