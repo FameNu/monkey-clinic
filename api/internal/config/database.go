@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	clinicdatabase "github.com/FameNu/clinic-management-system/api/internal/database"
 	"github.com/FameNu/clinic-management-system/api/internal/models"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/postgres"
@@ -64,7 +65,7 @@ func OpenDB() (*gorm.DB, error) {
 
 	appEnv := getEnv("APP_ENV", "development")
 	if appEnv == "development" {
-		err = seedDevData(db)
+		err = clinicdatabase.SeedAll(db)
 	} else if appEnv == "production" {
 		err = bootstrapProdAdmin(db)
 	}
@@ -81,48 +82,6 @@ func closeDB(db *gorm.DB) {
 	if err == nil {
 		_ = sqlDB.Close()
 	}
-}
-
-func seedDevData(db *gorm.DB) error {
-	var userCount int64
-	if err := db.Model(&models.User{}).Count(&userCount).Error; err != nil {
-		return fmt.Errorf("failed to count users: %w", err)
-	}
-	if userCount == 0 {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("admin1234"), bcrypt.DefaultCost)
-		if err != nil {
-			return fmt.Errorf("failed to hash development admin password: %w", err)
-		}
-		admin := models.User{
-			Email:        "admin@clinic.com",
-			PasswordHash: string(hashedPassword),
-			Prefix:       "นาย",
-			FullName:     "Clinic Administrator",
-			Role:         "admin",
-			IsActive:     true,
-		}
-		if err := db.Create(&admin).Error; err != nil {
-			return fmt.Errorf("failed to seed development admin: %w", err)
-		}
-		log.Println("[DEV] Seeded default admin: admin@clinic.com / admin1234")
-	}
-
-	var medCount int64
-	if err := db.Model(&models.Medication{}).Count(&medCount).Error; err != nil {
-		return fmt.Errorf("failed to count medications: %w", err)
-	}
-	if medCount == 0 {
-		meds := []models.Medication{
-			{Code: "MED-001", Name: "Paracetamol 500mg", GenericName: "Paracetamol", Unit: "เม็ด", PricePerUnit: 2.00, StockQuantity: 500, MinStockAlert: 50},
-			{Code: "MED-002", Name: "Amoxicillin 500mg", GenericName: "Amoxicillin", Unit: "แคปซูล", PricePerUnit: 8.00, StockQuantity: 200, MinStockAlert: 30},
-			{Code: "MED-003", Name: "Ibuprofen 400mg", GenericName: "Ibuprofen", Unit: "เม็ด", PricePerUnit: 5.00, StockQuantity: 150, MinStockAlert: 20},
-		}
-		if err := db.Create(&meds).Error; err != nil {
-			return fmt.Errorf("failed to seed development medications: %w", err)
-		}
-		log.Println("[DEV] Seeded initial medications")
-	}
-	return nil
 }
 
 func bootstrapProdAdmin(db *gorm.DB) error {
