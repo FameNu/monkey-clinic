@@ -31,13 +31,13 @@ func (h *MedicationHandler) GetMedications(c *fiber.Ctx) error {
 
 	if err := query.Find(&meds).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Failed to retrieve medications",
 		})
 	}
 
 	return c.JSON(fiber.Map{
-		"status": "success",
+		"status":      "success",
 		"medications": meds,
 	})
 }
@@ -60,14 +60,16 @@ func (h *MedicationHandler) CreateMedication(c *fiber.Ctx) error {
 	}
 
 	med := models.Medication{
-		Code:          req.Code,
-		Name:          req.Name,
-		GenericName:   req.GenericName,
-		Unit:          req.Unit,
-		PricePerUnit:  req.PricePerUnit,
-		StockQuantity: req.StockQuantity,
-		MinStockAlert: req.MinStockAlert,
-		Note:          req.Note,
+		Code:            req.Code,
+		Name:            req.Name,
+		GenericName:     req.GenericName,
+		Category:        req.Category,
+		AllergyWarnings: req.AllergyWarnings,
+		Unit:            req.Unit,
+		PricePerUnit:    req.PricePerUnit,
+		StockQuantity:   req.StockQuantity,
+		MinStockAlert:   req.MinStockAlert,
+		Note:            req.Note,
 	}
 
 	if err := h.db.Create(&med).Error; err != nil {
@@ -81,6 +83,44 @@ func (h *MedicationHandler) CreateMedication(c *fiber.Ctx) error {
 		"status":     "success",
 		"medication": med,
 	})
+}
+
+func (h *MedicationHandler) UpdateMedication(c *fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Invalid medication ID"})
+	}
+	var req dto.UpdateMedicationRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Invalid request body"})
+	}
+	if errs := utils.ValidateStruct(req); len(errs) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Validation failed", "errors": errs})
+	}
+
+	updated := models.Medication{
+		Code: req.Code, Name: req.Name, GenericName: req.GenericName,
+		Category: req.Category, AllergyWarnings: req.AllergyWarnings, Unit: req.Unit,
+		PricePerUnit: req.PricePerUnit, StockQuantity: req.StockQuantity,
+		MinStockAlert: req.MinStockAlert, Note: req.Note,
+	}
+	result := h.db.Model(&models.Medication{}).Where("id = ?", id).Updates(map[string]interface{}{
+		"code": updated.Code, "name": updated.Name, "generic_name": updated.GenericName,
+		"category": updated.Category, "allergy_warnings": updated.AllergyWarnings,
+		"unit": updated.Unit, "price_per_unit": updated.PricePerUnit,
+		"stock_quantity": updated.StockQuantity, "min_stock_alert": updated.MinStockAlert,
+		"note": updated.Note,
+	})
+	if result.Error != nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{"status": "error", "message": "Could not update medication; code may already exist"})
+	}
+	if result.RowsAffected == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": "error", "message": "Medication not found"})
+	}
+	if err := h.db.First(&updated, "id = ?", id).Error; err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": "Failed to reload medication"})
+	}
+	return c.JSON(fiber.Map{"status": "success", "medication": updated})
 }
 
 func (h *MedicationHandler) RestockMedication(c *fiber.Ctx) error {
@@ -111,7 +151,7 @@ func (h *MedicationHandler) RestockMedication(c *fiber.Ctx) error {
 	result := h.db.Model(&models.Medication{}).
 		Where("id = ?", id).
 		UpdateColumn("stock_quantity", gorm.Expr("stock_quantity + ?", req.AddQuantity))
-	
+
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
