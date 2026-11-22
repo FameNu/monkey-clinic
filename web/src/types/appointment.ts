@@ -65,6 +65,38 @@ export interface DashboardSummary {
   completed_today: number
   low_stock_meds: number
   today_revenue: number
+  patients_visited: number
+  appointment_statuses: {
+    completed: number
+    waiting: number
+    scheduled: number
+    checked_in: number
+    in_progress: number
+    cancelled: number
+    no_show: number
+  }
+  revenue: {
+    consultation_fees: number
+    medication_sales: number
+    billed_total: number
+    paid_total: number
+    unpaid_total: number
+    collected_on_date: number
+  }
+  visits: DashboardVisit[]
+}
+
+export interface DashboardVisit {
+  appointment_id: string
+  appointment_time: string
+  patient_id: string
+  patient_name: string
+  hn_code: string
+  doctor_name: string
+  diagnosis: string
+  visit_status: AppointmentStatus
+  billed_amount: number
+  payment_status: 'unbilled' | 'unpaid' | 'paid' | 'cancelled'
 }
 
 export interface CreateAppointmentRequest {

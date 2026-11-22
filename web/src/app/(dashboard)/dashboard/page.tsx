@@ -1,18 +1,14 @@
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-
-import { useAppointmentStore } from '@/store/useAppointmentStore'
-import { useDashboardStore } from '@/store/useDashboardStore'
-import DashboardAuthGuard from '@/components/auth/DashboardAuthGuard'
-
 import {
   Alert,
   Box,
   Button,
   Card,
   CardContent,
+  Chip,
   Grid,
   Paper,
   Table,
@@ -23,20 +19,36 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
-import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined'
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined'
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
-import { AppointmentStatusBadge } from '@/components/common/StatusBadge/AppointmentStatusBadge'
+import DashboardAuthGuard from '@/components/auth/DashboardAuthGuard'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 import EmptyState from '@/components/common/StateViews/EmptyState'
 import ErrorState from '@/components/common/StateViews/ErrorState'
 import LoadingState from '@/components/common/StateViews/LoadingState'
+import { AppointmentStatusBadge } from '@/components/common/StatusBadge/AppointmentStatusBadge'
+import { useDashboardStore } from '@/store/useDashboardStore'
+
+const bangkokDate = (offsetDays = 0) => {
+  const date = new Date(Date.now() + offsetDays * 24 * 60 * 60 * 1000)
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Bangkok',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
+}
+
+const formatCurrency = (amount: number) =>
+  `฿${amount.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`
 
 export default function DashboardPage() {
   return (
-    <DashboardAuthGuard>
+    <DashboardAuthGuard allowedRoles={['admin']}>
       <DashboardContent />
     </DashboardAuthGuard>
   )
@@ -44,72 +56,55 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const router = useRouter()
-  const {
-    summary,
-    isLoading: summaryLoading,
-    error: summaryError,
-    fetchDashboardSummary,
-  } = useDashboardStore()
-  const {
-    appointments: todayQueue,
-    isLoading: appointmentsLoading,
-    error: appointmentsError,
-    fetchAppointmentsByDate,
-  } = useAppointmentStore()
+  const { summary, isLoading, error, fetchDashboardSummary } =
+    useDashboardStore()
+  const [selectedDate, setSelectedDate] = useState(() => bangkokDate())
 
-  const today = new Date()
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-
-  const fetchDashboardData = useCallback(async () => {
-    await Promise.allSettled([
-      fetchDashboardSummary(),
-      fetchAppointmentsByDate(todayStr),
-    ])
-  }, [fetchAppointmentsByDate, fetchDashboardSummary, todayStr])
+  const loadSummary = useCallback(
+    () => fetchDashboardSummary(selectedDate),
+    [fetchDashboardSummary, selectedDate],
+  )
 
   useEffect(() => {
-    fetchDashboardData()
-  }, [fetchDashboardData])
+    void loadSummary()
+  }, [loadSummary])
 
-  if (
-    summaryLoading ||
-    appointmentsLoading ||
-    (!summary && !summaryError && !appointmentsError)
-  ) {
-    return <LoadingState message='กำลังโหลดข้อมูลภาพรวมคลินิก...' />
+  if (isLoading || (!summary && !error)) {
+    return <LoadingState message='กำลังโหลดข้อมูลรายงาน...' />
   }
-  if (summaryError || appointmentsError || !summary)
+  if (error || !summary) {
     return (
       <ErrorState
-        message={summaryError || appointmentsError || 'ไม่พบข้อมูล'}
-        onRetry={fetchDashboardData}
+        message={error || 'ไม่พบข้อมูลรายงาน'}
+        onRetry={() => void loadSummary()}
       />
     )
+  }
 
-  const kpiCards = [
+  const kpis = [
     {
-      title: 'นัดหมายวันนี้',
+      title: 'นัดหมายทั้งหมด',
       value: `${summary.today_appointments} คิว`,
       icon: <EventAvailableOutlinedIcon color='primary' fontSize='large' />,
-      bg: '#e0f2fe',
+      bg: 'primary.light',
     },
     {
-      title: 'ตรวจเสร็จสิ้นวันนี้',
-      value: `${summary.completed_today} คิว`,
-      icon: <CheckCircleOutlineIcon color='success' fontSize='large' />,
-      bg: '#dcfce7',
-    },
-    {
-      title: 'คนไข้ในระบบทั้งหมด',
-      value: `${summary.total_patients.toLocaleString()} ราย`,
+      title: 'คนไข้ที่ตรวจเสร็จ',
+      value: `${summary.patients_visited} ราย`,
       icon: <PeopleAltOutlinedIcon color='primary' fontSize='large' />,
-      bg: '#ccfbf1',
+      bg: 'primary.light',
     },
     {
-      title: 'รายได้วันนี้',
-      value: `฿${summary.today_revenue.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`,
-      icon: <PaymentsOutlinedIcon sx={{ color: '#d97706' }} fontSize='large' />,
-      bg: '#fef3c7',
+      title: 'ตรวจเสร็จ / รอตรวจ',
+      value: `${summary.appointment_statuses.completed} / ${summary.appointment_statuses.waiting}`,
+      icon: <CheckCircleOutlineIcon color='success' fontSize='large' />,
+      bg: 'success.light',
+    },
+    {
+      title: 'รับชำระในวันที่เลือก',
+      value: formatCurrency(summary.revenue.collected_on_date),
+      icon: <PaymentsOutlinedIcon color='secondary' fontSize='large' />,
+      bg: 'secondary.light',
     },
   ]
 
@@ -127,10 +122,10 @@ function DashboardContent() {
       >
         <Box>
           <Typography variant='h5' sx={{ fontWeight: 700 }}>
-            ภาพรวมคลินิก (Dashboard)
+            ภาพรวมคลินิกและรายงานประจำวัน
           </Typography>
           <Typography variant='body2' color='text.secondary'>
-            ข้อมูลประจำวันที่ {summary.date}
+            ข้อมูลวันที่ {summary.date} (เวลา Asia/Bangkok)
           </Typography>
         </Box>
         <Button
@@ -138,66 +133,75 @@ function DashboardContent() {
           endIcon={<ArrowForwardIcon />}
           onClick={() => router.push('/appointments')}
         >
-          จัดการคิวและนัดหมายทั้งหมด
+          จัดการคิวและนัดหมาย
         </Button>
       </Box>
+
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          mb: 3,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          flexWrap: 'wrap',
+          border: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <LabeledTextField
+          label='วันที่รายงาน'
+          type='date'
+          size='small'
+          value={selectedDate}
+          onChange={(event) => setSelectedDate(event.target.value)}
+          sx={{ minWidth: 220 }}
+        />
+        <Button
+          variant={selectedDate === bangkokDate() ? 'contained' : 'outlined'}
+          onClick={() => setSelectedDate(bangkokDate())}
+        >
+          วันนี้
+        </Button>
+        <Button
+          variant={selectedDate === bangkokDate(-1) ? 'contained' : 'outlined'}
+          onClick={() => setSelectedDate(bangkokDate(-1))}
+        >
+          เมื่อวาน
+        </Button>
+      </Paper>
 
       {summary.low_stock_meds > 0 && (
         <Alert
           severity='warning'
           icon={<WarningAmberIcon />}
           action={
-            <Button
-              color='inherit'
-              size='small'
-              onClick={() => router.push('/medications')}
-            >
+            <Button color='inherit' size='small' onClick={() => router.push('/medications')}>
               ดูคลังยา
             </Button>
           }
           sx={{ mb: 3 }}
         >
-          แจ้งเตือนคลังยา: มียาจำนวน{' '}
-          <strong>{summary.low_stock_meds} รายการ</strong>{' '}
+          แจ้งเตือนคลังยา: มียา {summary.low_stock_meds} รายการ
           ที่คงเหลือต่ำกว่าเกณฑ์ขั้นต่ำ
         </Alert>
       )}
 
-      {/* KPI Cards */}
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
-        {kpiCards.map((card) => (
+      <Grid container spacing={2.5} sx={{ mb: 3 }}>
+        {kpis.map((card) => (
           <Grid key={card.title} size={{ xs: 12, sm: 6, lg: 3 }}>
-            <Card
-              elevation={0}
-              sx={{ border: '1px solid', borderColor: 'divider' }}
-            >
-              <CardContent
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
+              <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
-                  <Typography
-                    variant='body2'
-                    color='text.secondary'
-                    sx={{ fontWeight: 500 }}
-                  >
+                  <Typography variant='body2' color='text.secondary'>
                     {card.title}
                   </Typography>
                   <Typography variant='h5' sx={{ mt: 0.5, fontWeight: 700 }}>
                     {card.value}
                   </Typography>
                 </Box>
-                <Box
-                  sx={{
-                    p: 1.5,
-                    borderRadius: 2.5,
-                    bgcolor: card.bg,
-                    display: 'flex',
-                  }}
-                >
+                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: card.bg, display: 'flex' }}>
                   {card.icon}
                 </Box>
               </CardContent>
@@ -206,61 +210,61 @@ function DashboardContent() {
         ))}
       </Grid>
 
-      {/* Today's Queue Table */}
-      <Typography variant='h6' sx={{ mb: 2, fontWeight: 700 }}>
-        รายการนัดหมายประจำวันนี้
-      </Typography>
+      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+        {[
+          ['ค่าตรวจ', summary.revenue.consultation_fees],
+          ['ยอดค่ายา', summary.revenue.medication_sales],
+          ['ยอดเรียกเก็บทั้งหมด', summary.revenue.billed_total],
+          ['ชำระแล้ว', summary.revenue.paid_total],
+          ['ค้างชำระ', summary.revenue.unpaid_total],
+        ].map(([label, amount]) => (
+          <Grid key={label} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
+              <CardContent>
+                <Typography variant='body2' color='text.secondary'>{label}</Typography>
+                <Typography variant='h6' sx={{ mt: 0.5, fontWeight: 700 }}>
+                  {formatCurrency(amount as number)}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
-      {todayQueue.length === 0 ? (
-        <EmptyState
-          title='ยังไม่มีรายการนัดหมายวันนี้'
-          description='สามารถกดปุ่มด้านล่างเพื่อเพิ่มนัดหมายใหม่ได้ทันที'
-          action={
-            <Button
-              variant='outlined'
-              onClick={() => router.push('/appointments')}
-            >
-              ไปหน้าตารางนัดหมาย
-            </Button>
-          }
-        />
+      <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Chip label={`เสร็จสิ้น ${summary.appointment_statuses.completed}`} color='success' />
+        <Chip label={`รอตรวจ ${summary.appointment_statuses.waiting}`} color='primary' />
+        <Chip label={`ยกเลิก ${summary.appointment_statuses.cancelled}`} color='default' />
+        <Chip label={`ค้างชำระ ${formatCurrency(summary.revenue.unpaid_total)}`} color='warning' />
+      </Box>
+
+      <Typography variant='h6' sx={{ mb: 2, fontWeight: 700 }}>
+        รายชื่อผู้ป่วยและการเรียกเก็บเงิน
+      </Typography>
+      {summary.visits.length === 0 ? (
+        <EmptyState title='ไม่มีนัดหมายในวันที่เลือก' description='เลือกวันอื่นเพื่อดูรายงานย้อนหลัง' />
       ) : (
-        <TableContainer
-          component={Paper}
-          elevation={0}
-          sx={{ border: '1px solid', borderColor: 'divider' }}
-        >
-          <Table sx={{ minWidth: 900 }}>
+        <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
+          <Table sx={{ minWidth: 1050 }}>
             <TableHead sx={{ bgcolor: 'grey.50' }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>เวลา</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>รหัส HN</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>ชื่อคนไข้</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>แพทย์ผู้ตรวจ</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>อาการเบื้องต้น</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>สถานะ</TableCell>
+                {['เวลา', 'รหัส HN', 'ชื่อผู้ป่วย', 'แพทย์', 'ผลวินิจฉัย', 'สถานะ', 'เรียกเก็บ', 'ชำระเงิน'].map((head) => (
+                  <TableCell key={head} sx={{ fontWeight: 700 }}>{head}</TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {todayQueue.map((item) => (
-                <TableRow key={item.id} hover>
-                  <TableCell sx={{ fontWeight: 600 }}>
-                    {item.start_time} - {item.end_time}
-                  </TableCell>
-                  <TableCell>{item.patient?.hn_code || '-'}</TableCell>
+              {summary.visits.map((visit) => (
+                <TableRow key={visit.appointment_id} hover>
+                  <TableCell>{visit.appointment_time}</TableCell>
+                  <TableCell>{visit.hn_code}</TableCell>
+                  <TableCell>{visit.patient_name}</TableCell>
+                  <TableCell>{visit.doctor_name}</TableCell>
+                  <TableCell>{visit.diagnosis || '-'}</TableCell>
+                  <TableCell><AppointmentStatusBadge status={visit.visit_status} /></TableCell>
+                  <TableCell>{formatCurrency(visit.billed_amount)}</TableCell>
                   <TableCell>
-                    {item.patient
-                      ? `${item.patient.prefix}${item.patient.full_name}`
-                      : '-'}
-                  </TableCell>
-                  <TableCell>
-                    {item.doctor
-                      ? `${item.doctor.prefix}${item.doctor.full_name}`
-                      : '-'}
-                  </TableCell>
-                  <TableCell>{item.reason || '-'}</TableCell>
-                  <TableCell>
-                    <AppointmentStatusBadge status={item.status} />
+                    <Chip size='small' label={visit.payment_status} color={visit.payment_status === 'paid' ? 'success' : visit.payment_status === 'unpaid' ? 'warning' : 'default'} />
                   </TableCell>
                 </TableRow>
               ))}

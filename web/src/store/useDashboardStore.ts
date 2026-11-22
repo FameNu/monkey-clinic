@@ -10,7 +10,7 @@ type DashboardState = {
 }
 
 type DashboardStateActions = {
-  fetchDashboardSummary: () => Promise<void>
+  fetchDashboardSummary: (date: string) => Promise<void>
   reset: () => void
 }
 
@@ -23,10 +23,10 @@ export const useDashboardStore = create<
   isLoading: false,
   error: null,
 
-  fetchDashboardSummary: async () => {
+  fetchDashboardSummary: async (date) => {
     set({ isLoading: true, error: null })
     try {
-      const response = await getDashboardSummary()
+      const response = await getDashboardSummary(date)
       set({ summary: response, isLoading: false })
     } catch (error) {
       const errorMessage = getErrorMessage(
