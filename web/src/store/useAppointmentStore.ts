@@ -6,6 +6,7 @@ import {
   CreateAppointmentRequest,
 } from '@/types'
 import { appointmentApi } from '@/lib/api/appointment-api'
+import { getErrorMessage } from '@/lib/axios-instance'
 
 type AppointmentState = {
   appointments: Appointment[]
@@ -28,13 +29,6 @@ type AppointmentActions = {
 const { getAppointments, createAppointment, updateAppointmentStatus } =
   appointmentApi()
 
-const extractErrorMessage = (error: unknown, fallback: string): string => {
-  return (
-    (error as { response?: { data?: { message?: string } } })?.response?.data
-      ?.message || fallback
-  )
-}
-
 export const useAppointmentStore = create<
   AppointmentState & AppointmentActions
 >()((set) => ({
@@ -51,7 +45,7 @@ export const useAppointmentStore = create<
     } catch (error) {
       set({
         isLoading: false,
-        error: extractErrorMessage(error, 'ไม่สามารถโหลดรายการนัดหมายได้'),
+        error: getErrorMessage(error, 'ไม่สามารถโหลดรายการนัดหมายได้'),
       })
     }
   },
@@ -64,7 +58,7 @@ export const useAppointmentStore = create<
     } catch (error) {
       set({
         isLoading: false,
-        error: extractErrorMessage(
+        error: getErrorMessage(
           error,
           'ไม่สามารถโหลดรายการนัดหมายประจำวันได้',
         ),
@@ -80,7 +74,7 @@ export const useAppointmentStore = create<
     } catch (error) {
       set({ isSubmitting: false })
       throw new Error(
-        extractErrorMessage(
+        getErrorMessage(
           error,
           'ไม่สามารถสร้างนัดหมายได้ กรุณาตรวจสอบข้อมูลอีกครั้ง',
         ),
@@ -97,7 +91,7 @@ export const useAppointmentStore = create<
         ),
       }))
     } catch (error) {
-      throw new Error(extractErrorMessage(error, 'อัปเดตสถานะคิวไม่สำเร็จ'))
+      throw new Error(getErrorMessage(error, 'อัปเดตสถานะคิวไม่สำเร็จ'))
     }
   },
 

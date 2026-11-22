@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/axios'
+import apiClient from '@/lib/axios-instance'
 import { Medication } from '@/types'
 
 export const medicationApi = () => {

@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/axios'
+import apiClient from '@/lib/axios-instance'
 import { DashboardSummary } from '@/types'
 
 export const dashboardApi = () => {

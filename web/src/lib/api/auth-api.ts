@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/axios'
+import apiClient from '@/lib/axios-instance'
 import { User } from '@/types'
 
 export interface LoginResponse {

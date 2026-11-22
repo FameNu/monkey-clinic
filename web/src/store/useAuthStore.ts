@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import axios from 'axios'
 import { User } from '@/types'
 import { authApi } from '@/lib/api/auth-api'
+import { getErrorMessage } from '@/lib/axios-instance'
 
 interface AuthState {
   token: string | null
@@ -29,16 +29,13 @@ export const useAuthStore = create<AuthState>()(
           const { token, user } = await authApi.login(email, password)
           set({ token, user, isAuthenticated: true, isLoading: false })
         } catch (error: unknown) {
-          const responseMessage = axios.isAxiosError<{ message?: string }>(error)
-            ? error.response?.data?.message
-            : undefined
           set({
             isLoading: false,
-            loginError:
-              responseMessage ||
+            loginError: getErrorMessage(
+              error,
               'อีเมลหรือรหัสผ่านไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง',
+            ),
           })
-          throw error
         }
       },
       clearLoginError: () => set({ loginError: null }),

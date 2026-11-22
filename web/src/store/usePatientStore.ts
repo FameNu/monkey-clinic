@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { create } from 'zustand'
 import {
   Medication,
@@ -8,6 +7,7 @@ import {
 } from '@/types'
 import { patientApi } from '@/lib/api/patient-api'
 import { medicationApi } from '@/lib/api/medication-api'
+import { getErrorMessage } from '@/lib/axios-instance'
 
 type PatientState = {
   patients: Patient[]
@@ -36,16 +36,6 @@ const { getPatients, getPatientById, createPatient, addPatientAllergy } =
   patientApi()
 const { getMedications } = medicationApi()
 
-const extractErrorMessage = (error: unknown, fallback: string): string => {
-  if (
-    axios.isAxiosError<{ message?: string | Record<string, string> }>(error)
-  ) {
-    const msg = error.response?.data?.message
-    if (typeof msg === 'string') return msg
-  }
-  return fallback
-}
-
 export const usePatientStore = create<PatientState & PatientActions>()(
   (set, get) => ({
     patients: [],
@@ -64,10 +54,7 @@ export const usePatientStore = create<PatientState & PatientActions>()(
       } catch (error) {
         set({
           isLoading: false,
-          error: extractErrorMessage(
-            error,
-            'ไม่สามารถโหลดข้อมูลทะเบียนคนไข้ได้',
-          ),
+          error: getErrorMessage(error, 'ไม่สามารถโหลดข้อมูลทะเบียนคนไข้ได้'),
         })
       }
     },
@@ -80,7 +67,7 @@ export const usePatientStore = create<PatientState & PatientActions>()(
       } catch (error) {
         set({ isDetailLoading: false })
         throw new Error(
-          extractErrorMessage(error, 'ไม่สามารถโหลดรายละเอียดคนไข้ได้'),
+          getErrorMessage(error, 'ไม่สามารถโหลดรายละเอียดคนไข้ได้'),
         )
       }
     },
@@ -108,7 +95,7 @@ export const usePatientStore = create<PatientState & PatientActions>()(
       } catch (error) {
         set({ isSubmitting: false })
         throw new Error(
-          extractErrorMessage(
+          getErrorMessage(
             error,
             'ลงทะเบียนคนไข้ใหม่ไม่สำเร็จ กรุณาตรวจสอบข้อมูล',
           ),
@@ -139,9 +126,7 @@ export const usePatientStore = create<PatientState & PatientActions>()(
         }))
       } catch (error) {
         set({ isSubmitting: false })
-        throw new Error(
-          extractErrorMessage(error, 'บันทึกข้อมูลการแพ้ยาไม่สำเร็จ'),
-        )
+        throw new Error(getErrorMessage(error, 'บันทึกข้อมูลการแพ้ยาไม่สำเร็จ'))
       }
     },
 

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { DashboardSummary } from '@/types'
 import { dashboardApi } from '@/lib/api/dashboard-api'
+import { getErrorMessage } from '@/lib/axios-instance'
 
 type DashboardState = {
   summary: DashboardSummary | null
@@ -28,9 +29,12 @@ export const useDashboardStore = create<
       const response = await getDashboardSummary()
       set({ summary: response, isLoading: false })
     } catch (error) {
+      const errorMessage = getErrorMessage(
+        error,
+        'ไม่สามารถโหลดข้อมูลภาพรวมคลินิกได้',
+      )
       console.error('Error fetching dashboard summary:', error)
-      set({ isLoading: false, error: 'ไม่สามารถโหลดข้อมูลภาพรวมคลินิกได้' })
-      throw error
+      set({ isLoading: false, error: errorMessage })
     }
   },
 
