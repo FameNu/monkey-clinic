@@ -1,0 +1,26 @@
+'use client'
+
+import { FormEvent, useState } from 'react'
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material'
+import { CreateMedicationRequest } from '@/types'
+import { useMedicationStore } from '@/store/useMedicationStore'
+
+interface Props { open: boolean; onClose: () => void }
+const initial: CreateMedicationRequest = { code: '', name: '', generic_name: '', unit: 'เม็ด', price_per_unit: 0, stock_quantity: 0, min_stock_alert: 10 }
+
+export function CreateMedicationModal({ open, onClose }: Props) {
+  const createMedication = useMedicationStore((state) => state.createMedication)
+  const isSubmitting = useMedicationStore((state) => state.isSubmitting)
+  const [payload, setPayload] = useState(initial)
+  const [error, setError] = useState<string | null>(null)
+  const submit = async (event: FormEvent) => { event.preventDefault(); setError(null); try { await createMedication(payload); setPayload(initial); onClose() } catch (reason) { setError(reason instanceof Error ? reason.message : 'เพิ่มยาไม่สำเร็จ') } }
+  return <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth><form onSubmit={submit}><DialogTitle>เพิ่มรายการยา</DialogTitle><DialogContent dividers>{error && <Alert severity='error' sx={{ mb: 2 }}>{error}</Alert>}<Box sx={{ display: 'grid', gap: 2, pt: 1, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+    <TextField label='รหัสยา' value={payload.code} onChange={(e) => setPayload({ ...payload, code: e.target.value })} required />
+    <TextField label='ชื่อยา' value={payload.name} onChange={(e) => setPayload({ ...payload, name: e.target.value })} required />
+    <TextField label='ชื่อสามัญ' value={payload.generic_name} onChange={(e) => setPayload({ ...payload, generic_name: e.target.value })} />
+    <TextField label='หน่วย' value={payload.unit} onChange={(e) => setPayload({ ...payload, unit: e.target.value })} required />
+    <TextField label='ราคาต่อหน่วย (บาท)' type='number' slotProps={{ htmlInput: { min: 0, step: '0.01' } }} value={payload.price_per_unit} onChange={(e) => setPayload({ ...payload, price_per_unit: Number(e.target.value) })} required />
+    <TextField label='จำนวนเริ่มต้น' type='number' slotProps={{ htmlInput: { min: 0 } }} value={payload.stock_quantity} onChange={(e) => setPayload({ ...payload, stock_quantity: Number(e.target.value) })} required />
+    <TextField label='แจ้งเตือนเมื่อเหลือ' type='number' slotProps={{ htmlInput: { min: 0 } }} value={payload.min_stock_alert} onChange={(e) => setPayload({ ...payload, min_stock_alert: Number(e.target.value) })} required />
+  </Box></DialogContent><DialogActions><Button onClick={onClose} disabled={isSubmitting}>ยกเลิก</Button><Button type='submit' variant='contained' disabled={isSubmitting}>{isSubmitting ? 'กำลังบันทึก...' : 'เพิ่มยา'}</Button></DialogActions></form></Dialog>
+}
