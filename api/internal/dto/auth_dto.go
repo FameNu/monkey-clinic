@@ -12,6 +12,7 @@ type UserResponse struct {
 	Email    string    `json:"email"`
 	Prefix   string    `json:"prefix"`
 	FullName string    `json:"full_name"`
+	Phone    string    `json:"phone"`
 	Role     string    `json:"role"`
 	IsActive bool      `json:"is_active"`
 }
