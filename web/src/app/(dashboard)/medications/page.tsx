@@ -31,6 +31,16 @@ import { CreateMedicationModal } from '@/components/medications/CreateMedication
 import { RestockModal } from '@/components/medications/RestockModal'
 import { Medication } from '@/types'
 
+const TABLE_HEADERS = [
+  'รหัส',
+  'ชื่อยา / ชื่อสามัญ',
+  'หน่วย',
+  'ราคาต่อหน่วย',
+  'คงเหลือ',
+  'สต็อกขั้นต่ำ',
+  'จัดการ',
+]
+
 export default function MedicationsPage() {
   return (
     <DashboardAuthGuard>
@@ -40,18 +50,18 @@ export default function MedicationsPage() {
 }
 function MedicationContent() {
   const role = useAuthStore((state) => state.user?.role)
-  const medications = useMedicationStore((state) => state.medications)
-  const isLoading = useMedicationStore((state) => state.isLoading)
-  const error = useMedicationStore((state) => state.error)
-  const fetchMedications = useMedicationStore((state) => state.fetchMedications)
+  const { medications, isLoading, error, fetchMedications } =
+    useMedicationStore()
+
   const [search, setSearch] = useState('')
   const [lowStockOnly, setLowStockOnly] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [restock, setRestock] = useState<Medication | null>(null)
 
   useEffect(() => {
-    void fetchMedications()
+    fetchMedications()
   }, [fetchMedications])
+
   const filtered = useMemo(
     () =>
       medications.filter((med) => {
@@ -65,8 +75,10 @@ function MedicationContent() {
       }),
     [medications, search, lowStockOnly],
   )
+
   const canCreate = role === 'admin'
   const canRestock = role === 'admin' || role === 'receptionist'
+  
   return (
     <Box>
       <Box
@@ -139,7 +151,7 @@ function MedicationContent() {
       {isLoading ? (
         <LoadingState message='กำลังโหลดคลังยา...' />
       ) : error ? (
-        <ErrorState message={error} onRetry={() => void fetchMedications()} />
+        <ErrorState message={error} onRetry={() => fetchMedications()} />
       ) : filtered.length === 0 ? (
         <EmptyState
           title='ไม่พบรายการยา'
@@ -154,15 +166,7 @@ function MedicationContent() {
           <Table sx={{ minWidth: 900 }}>
             <TableHead sx={{ bgcolor: 'grey.50' }}>
               <TableRow>
-                {[
-                  'รหัส',
-                  'ชื่อยา / ชื่อสามัญ',
-                  'หน่วย',
-                  'ราคาต่อหน่วย',
-                  'คงเหลือ',
-                  'สต็อกขั้นต่ำ',
-                  'จัดการ',
-                ].map((head) => (
+                {TABLE_HEADERS.map((head) => (
                   <TableCell key={head} sx={{ fontWeight: 700 }}>
                     {head}
                   </TableCell>

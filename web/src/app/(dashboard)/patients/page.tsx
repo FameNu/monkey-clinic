@@ -30,11 +30,8 @@ import PatientDetailDrawer from '@/components/patients/PatientDetailDrawer'
 import { LabeledTextField } from '@/components/common/LabeledTextField'
 
 export default function PatientsPage() {
-  const user = useAuthStore((state) => state.user)
-  const patients = usePatientStore((state) => state.patients)
-  const isLoading = usePatientStore((state) => state.isLoading)
-  const error = usePatientStore((state) => state.error)
-  const fetchPatients = usePatientStore((state) => state.fetchPatients)
+  const { user } = useAuthStore()
+  const { patients, isLoading, error, fetchPatients } = usePatientStore()
 
   const [searchInput, setSearchInput] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')

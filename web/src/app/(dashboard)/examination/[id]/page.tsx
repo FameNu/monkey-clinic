@@ -37,19 +37,17 @@ export default function ExaminationPage({ params }: PageProps) {
   const { id: appointmentId } = use(params)
   const router = useRouter()
 
-  const appointment = useExaminationStore((state) => state.appointment)
-  const patient = useExaminationStore((state) => state.patient)
-  const medicalHistory = useExaminationStore((state) => state.medicalHistory)
-  const medications = useExaminationStore((state) => state.medications)
-  const isLoading = useExaminationStore((state) => state.isLoading)
-  const isSubmitting = useExaminationStore((state) => state.isSubmitting)
-  const error = useExaminationStore((state) => state.error)
-  const loadExaminationContext = useExaminationStore(
-    (state) => state.loadExaminationContext,
-  )
-  const submitMedicalRecord = useExaminationStore(
-    (state) => state.submitMedicalRecord,
-  )
+  const {
+    appointment,
+    patient,
+    medicalHistory,
+    medications,
+    isLoading,
+    isSubmitting,
+    error,
+    loadExaminationContext,
+    submitMedicalRecord,
+  } = useExaminationStore()
 
   const [symptoms, setSymptoms] = useState('')
   const [diagnosis, setDiagnosis] = useState('')

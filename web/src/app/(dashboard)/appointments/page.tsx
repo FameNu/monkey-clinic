@@ -49,24 +49,16 @@ export default function AppointmentsPage() {
 
 function AppointmentsContent() {
   const router = useRouter()
-  const user = useAuthStore((state) => state.user)
 
-  const appointments = useAppointmentStore((state) => state.appointments)
-  const isLoading = useAppointmentStore((state) => state.isLoading)
-  const error = useAppointmentStore((state) => state.error)
-  const fetchAppointments = useAppointmentStore(
-    (state) => state.fetchAppointments,
-  )
-  const updateAppointmentStatus = useAppointmentStore(
-    (state) => state.updateAppointmentStatus,
-  )
+  const { user } = useAuthStore()
+  const {
+    appointments,
+    isLoading,
+    error,
+    fetchAppointments,
+    updateAppointmentStatus,
+  } = useAppointmentStore()
 
-  const [selectedDate, setSelectedDate] = useState(getTodayLocalString)
-  const [statusFilter, setStatusFilter] = useState<AppointmentStatusFilter>('')
-  const [actionError, setActionError] = useState<string | null>(null)
-  const [openCreateModal, setOpenCreateModal] = useState(false)
-
-  const loadAppointments = useCallback(() => {
     fetchAppointments({ date: selectedDate, status: statusFilter })
   }, [fetchAppointments, selectedDate, statusFilter])
 
