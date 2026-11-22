@@ -8,3 +8,13 @@ export interface User {
   role: UserRole
   is_active: boolean
 }
+
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface LoginResponse {
+  token: string
+  user: User
+}

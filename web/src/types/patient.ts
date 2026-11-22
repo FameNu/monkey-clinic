@@ -78,3 +78,5 @@ export interface CreateMedicalRecordPayload {
   prescriptions: PrescriptionInput[]
   override_allergy_warning: boolean
 }
+
+export type CreateMedicalRecordRequest = CreateMedicalRecordPayload

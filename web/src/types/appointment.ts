@@ -21,6 +21,41 @@ export interface Appointment {
   status: AppointmentStatus
   reason: string
   medical_record?: MedicalRecord
+  invoice?: Invoice
+}
+
+export interface Invoice {
+  id: string
+  invoice_number: string
+  appointment_id: string
+  appointment?: Appointment
+  doctor_fee: number
+  medication_total: number
+  discount: number
+  total_amount: number
+  payment_method?: PaymentMethod | ''
+  payment_status: PaymentStatus
+  paid_at?: string | null
+  created_at?: string
+}
+
+export interface InvoiceItem {
+  description: string
+  quantity: number
+  unit_price: number
+  total: number
+}
+
+export type PaymentStatus = 'unpaid' | 'paid' | 'cancelled'
+export type PaymentMethod = 'cash' | 'promptpay' | 'credit_card'
+
+export interface CreateInvoiceRequest {
+  appointment_id: string
+  discount: number
+}
+
+export interface PayInvoiceRequest {
+  payment_method: PaymentMethod
 }
 
 export interface DashboardSummary {
