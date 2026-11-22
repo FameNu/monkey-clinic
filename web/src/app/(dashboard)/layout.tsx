@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ReactNode, useState, useSyncExternalStore } from 'react'
+import { ReactNode, Suspense, useState, useSyncExternalStore } from 'react'
 
 import { useAuthStore } from '@/store/useAuthStore'
 import { UserRole } from '@/types'
@@ -12,6 +12,7 @@ import {
   Avatar,
   Box,
   Chip,
+  CircularProgress,
   Divider,
   Drawer,
   IconButton,
@@ -85,6 +86,26 @@ const NAV_ITEMS: NavItem[] = [
 ]
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  return (
+    <Suspense
+      fallback={
+        <Box
+          sx={{
+            minHeight: '100vh',
+            display: 'grid',
+            placeItems: 'center',
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      }
+    >
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </Suspense>
+  )
+}
+
+function DashboardLayoutContent({ children }: DashboardLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
   const user = useAuthStore((state) => state.user)
