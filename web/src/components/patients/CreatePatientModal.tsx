@@ -123,54 +123,50 @@ export default function CreatePatientModal({ open, onClose }: Props) {
               />
             </Box>
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <LabeledTextField
-                label='เบอร์โทรศัพท์'
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                fullWidth
-              />
+            <LabeledTextField
+              select
+              label='เพศ'
+              value={gender}
+              onChange={(e) => setGender(e.target.value as 'male' | 'female')}
+              required
+              sx={{ minWidth: 140 }}
+            >
+              <MenuItem value='male'>ชาย</MenuItem>
+              <MenuItem value='female'>หญิง</MenuItem>
+            </LabeledTextField>
 
-              <LabeledTextField
-                select
-                label='เพศ'
-                value={gender}
-                onChange={(e) => setGender(e.target.value as 'male' | 'female')}
-                required
-                sx={{ minWidth: 140 }}
-              >
-                <MenuItem value='male'>ชาย</MenuItem>
-                <MenuItem value='female'>หญิง</MenuItem>
-              </LabeledTextField>
-            </Box>
+            <LabeledTextField
+              label='เบอร์โทรศัพท์'
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              required
+              fullWidth
+            />
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <LabeledTextField
-                label='วันเดือนปีเกิด'
-                type='date'
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
-                fullWidth
-              />
+            <LabeledTextField
+              select
+              label='กรุ๊ปเลือด'
+              value={bloodType}
+              onChange={(e) =>
+                setBloodType(e.target.value as 'A' | 'B' | 'AB' | 'O' | '')
+              }
+              sx={{ minWidth: 140 }}
+            >
 
-              <LabeledTextField
-                select
-                label='กรุ๊ปเลือด'
-                value={bloodType}
-                onChange={(e) =>
-                  setBloodType(e.target.value as 'A' | 'B' | 'AB' | 'O' | '')
-                }
-                sx={{ minWidth: 140 }}
-              >
-                <MenuItem value=''>ไม่ระบุ</MenuItem>
-                {BLOOD_TYPES.map((bg) => (
-                  <MenuItem key={bg} value={bg}>
-                    {bg}
-                  </MenuItem>
-                ))}
-              </LabeledTextField>
-            </Box>
+            <LabeledTextField
+              label='วันเดือนปีเกิด'
+              type='date'
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              fullWidth
+            />
+              <MenuItem value=''>ไม่ระบุ</MenuItem>
+              {BLOOD_TYPES.map((bg) => (
+                <MenuItem key={bg} value={bg}>
+                  {bg}
+                </MenuItem>
+              ))}
+            </LabeledTextField>
 
             <LabeledTextField
               label='โรคประจำตัว (ถ้ามี)'

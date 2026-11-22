@@ -3,13 +3,13 @@
 import { FormEvent, useState } from 'react'
 import {
   Alert,
-  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   FormControlLabel,
+  Stack,
   Switch,
 } from '@mui/material'
 import { LabeledTextField } from '@/components/common/LabeledTextField'
@@ -71,14 +71,7 @@ export function CreateDoctorModal({ open, onClose }: Props) {
               {error}
             </Alert>
           )}
-          <Box
-            sx={{
-              display: 'grid',
-              gap: 2,
-              pt: 1,
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
-            }}
-          >
+          <Stack spacing={1.5}>
             <LabeledTextField
               label='คำนำหน้า'
               value={payload.prefix}
@@ -146,7 +139,7 @@ export function CreateDoctorModal({ open, onClose }: Props) {
                 />
               </>
             )}
-          </Box>
+          </Stack>
         </DialogContent>
         <DialogActions>
           <Button onClick={onClose} disabled={isSubmitting}>
