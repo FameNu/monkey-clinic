@@ -1,6 +1,6 @@
 import { create } from 'zustand'
-import { StaffPayload, StaffRecord } from '@/types'
-import { staffApi, StaffFilters } from '@/lib/api/staff-api'
+import { StaffPayload, StaffRecord, StaffFilters } from '@/types'
+import { staffApi } from '@/lib/api/staff-api'
 import { getErrorMessage } from '@/lib/axios-instance'
 
 interface StaffState {
