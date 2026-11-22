@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 
-import { clinicApi } from '@/lib/api/clinic-api'
 import { useAppointmentStore } from '@/store/useAppointmentStore'
-import { Doctor, Patient } from '@/types'
+import { useDoctorStore } from '@/store/useDoctorStore'
+import { usePatientStore } from '@/store/usePatientStore'
 
 import {
   Alert,
@@ -25,8 +25,6 @@ interface Props {
   defaultDate?: string
 }
 
-const { getPatients, getActiveDoctors } = clinicApi()
-
 export function CreateAppointmentModal({
   open,
   onClose,
@@ -36,10 +34,10 @@ export function CreateAppointmentModal({
   const createAppointment = useAppointmentStore(
     (state) => state.createAppointment,
   )
-  const isSubmitting = useAppointmentStore((state) => state.isSubmitting)
+  const { isSubmitting } = useAppointmentStore()
 
-  const [patients, setPatients] = useState<Patient[]>([])
-  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const { patients, fetchPatients } = usePatientStore()
+  const { doctors, fetchDoctors } = useDoctorStore()
 
   const [patientId, setPatientId] = useState('')
   const [doctorId, setDoctorId] = useState('')
@@ -54,23 +52,10 @@ export function CreateAppointmentModal({
   useEffect(() => {
     if (!open) return
 
-    let isMounted = true
-    Promise.all([getPatients(), getActiveDoctors()])
-      .then(([patientList, doctorList]) => {
-        if (!isMounted) return
-        setPatients(patientList)
-        setDoctors(doctorList)
-        setError(null)
-      })
-      .catch(() => {
-        if (!isMounted) return
-        setError('ไม่สามารถโหลดรายชื่อคนไข้หรือแพทย์ได้')
-      })
-
-    return () => {
-      isMounted = false
-    }
-  }, [open])
+    Promise.all([fetchPatients(), fetchDoctors()]).catch(() => {
+      setError('ไม่สามารถโหลดรายชื่อคนไข้หรือแพทย์ได้')
+    })
+  }, [open, fetchPatients, fetchDoctors])
 
   const handleClose = () => {
     setError(null)
@@ -114,7 +99,7 @@ export function CreateAppointmentModal({
             setError(null)
             if (defaultDate) setAppointmentDate(defaultDate)
           },
-        }
+        },
       }}
     >
       <form onSubmit={handleSubmit}>
@@ -153,12 +138,14 @@ export function CreateAppointmentModal({
               required
               fullWidth
             >
-              {doctors.map((d) => (
-                <MenuItem key={d.id} value={d.id}>
-                  {d.prefix}
-                  {d.full_name} ({d.specialization})
-                </MenuItem>
-              ))}
+              {doctors
+                .filter((d) => d.is_active)
+                .map((d) => (
+                  <MenuItem key={d.id} value={d.id}>
+                    {d.prefix}
+                    {d.full_name} ({d.specialization})
+                  </MenuItem>
+                ))}
             </TextField>
 
             <TextField
