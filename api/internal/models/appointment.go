@@ -43,13 +43,14 @@ type PrescriptionItem struct {
 
 type Invoice struct {
 	BaseModel
-	InvoiceNumber   string     `gorm:"type:varchar(30);uniqueIndex;not null" json:"invoice_number"`
-	AppointmentID   uuid.UUID  `gorm:"type:uuid;uniqueIndex;not null" json:"appointment_id"`
-	DoctorFee       float64    `gorm:"type:decimal(10,2);not null" json:"doctor_fee"`
-	MedicationTotal float64    `gorm:"type:decimal(10,2);not null" json:"medication_total"`
-	Discount        float64    `gorm:"type:decimal(10,2);default:0" json:"discount"`
-	TotalAmount     float64    `gorm:"type:decimal(10,2);not null" json:"total_amount"`
-	PaymentMethod   string     `gorm:"type:varchar(20)" json:"payment_method"`                           // cash, promptpay, credit_card
-	PaymentStatus   string     `gorm:"type:varchar(20);not null;default:'unpaid'" json:"payment_status"` // unpaid, paid, cancelled
-	PaidAt          *time.Time `json:"paid_at"`
+	InvoiceNumber   string       `gorm:"type:varchar(30);uniqueIndex;not null" json:"invoice_number"`
+	AppointmentID   uuid.UUID    `gorm:"type:uuid;uniqueIndex;not null" json:"appointment_id"`
+	Appointment     *Appointment `gorm:"foreignKey:AppointmentID" json:"appointment,omitempty"`
+	DoctorFee       float64      `gorm:"type:decimal(10,2);not null" json:"doctor_fee"`
+	MedicationTotal float64      `gorm:"type:decimal(10,2);not null" json:"medication_total"`
+	Discount        float64      `gorm:"type:decimal(10,2);default:0" json:"discount"`
+	TotalAmount     float64      `gorm:"type:decimal(10,2);not null" json:"total_amount"`
+	PaymentMethod   string       `gorm:"type:varchar(20)" json:"payment_method"`                           // cash, promptpay, credit_card
+	PaymentStatus   string       `gorm:"type:varchar(20);not null;default:'unpaid'" json:"payment_status"` // unpaid, paid, cancelled
+	PaidAt          *time.Time   `json:"paid_at"`
 }
