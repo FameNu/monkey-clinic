@@ -44,7 +44,7 @@ export default function LoginPage() {
             <Box sx={{ textAlign: 'center', mb: 3 }}>
               <LocalHospitalIcon color='primary' sx={{ fontSize: 48, mb: 1 }} />
               <Typography variant='h5' sx={{ fontWeight: 700 }}>
-                ClinicCare System
+                Monkey Clinic System
               </Typography>
               <Typography variant='body2' color='text.secondary'>
                 ระบบจัดการคลินิกและนัดหมายผู้ป่วย
