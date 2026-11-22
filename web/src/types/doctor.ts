@@ -8,6 +8,7 @@ export interface Doctor {
   license_number: string
   phone?: string
   consultation_fee: number
+  notes?: string
   is_active: boolean
 }
 
