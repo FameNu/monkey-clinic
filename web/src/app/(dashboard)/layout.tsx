@@ -51,7 +51,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'ภาพรวมคลินิก (Dashboard)',
     href: '/dashboard',
     icon: <DashboardOutlinedIcon />,
-    roles: ['admin', 'receptionist', 'doctor'],
+    roles: ['admin'],
   },
   {
     label: 'คิวตรวจและนัดหมาย',
@@ -82,6 +82,12 @@ const NAV_ITEMS: NavItem[] = [
     href: '/doctors',
     icon: <LocalHospitalIcon />,
     roles: ['admin', 'receptionist', 'doctor'],
+  },
+  {
+    label: 'จัดการบุคลากร',
+    href: '/staff',
+    icon: <PeopleAltOutlinedIcon />,
+    roles: ['admin'],
   },
 ]
 
