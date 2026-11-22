@@ -271,7 +271,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
 
       {/* Mobile menu */}
       <Drawer
-        variant='permanent'
+        variant='temporary'
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
         ModalProps={{ keepMounted: true }}
