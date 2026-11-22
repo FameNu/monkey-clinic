@@ -143,7 +143,7 @@ func (h *StaffHandler) CreateDoctor(c *fiber.Ctx) error {
 
 func (h *StaffHandler) GetDoctors(c *fiber.Ctx) error {
 	var doctors []models.Doctor
-	if err := h.db.Find(&doctors).Error; err != nil {
+	if err := h.db.Preload("User").Find(&doctors).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"status":  "error",
 			"message": "Failed to fetch doctors",
@@ -160,7 +160,7 @@ func (h *StaffHandler) AddDoctorSchedule(c *fiber.Ctx) error {
 	doctorID, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Invalid doctor ID",
 		})
 	}
@@ -168,7 +168,7 @@ func (h *StaffHandler) AddDoctorSchedule(c *fiber.Ctx) error {
 	var req dto.DoctorScheduleRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Invalid request body",
 		})
 	}
@@ -194,13 +194,13 @@ func (h *StaffHandler) AddDoctorSchedule(c *fiber.Ctx) error {
 
 	if err := h.db.Create(&schedule).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Failed to add schedule",
 		})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"status": "success",
-		"data": schedule,
+		"data":   schedule,
 	})
 }
