@@ -57,6 +57,7 @@ func New(db *gorm.DB) *fiber.App {
 
 	protected.Post("/appointments", middleware.RequireRoles("admin", "receptionist"), appointmentHandler.CreateAppointment)
 	protected.Get("/appointments", appointmentHandler.GetAppointments)
+	protected.Get("/appointments/:id", appointmentHandler.GetAppointmentByID)
 	protected.Patch("/appointments/:id/status", middleware.RequireRoles("admin", "doctor", "receptionist"), appointmentHandler.UpdateStatus)
 
 	protected.Get("/medications", medicationHandler.GetMedications)

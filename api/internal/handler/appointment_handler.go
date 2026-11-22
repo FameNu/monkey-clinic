@@ -23,7 +23,7 @@ func (h *AppointmentHandler) CreateAppointment(c *fiber.Ctx) error {
 	userID, ok := c.Locals("user_id").(uuid.UUID)
 	if !ok {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Unauthorized",
 		})
 	}
@@ -31,7 +31,7 @@ func (h *AppointmentHandler) CreateAppointment(c *fiber.Ctx) error {
 	var req dto.CreateAppointmentRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Invalid request body",
 		})
 	}
@@ -44,7 +44,7 @@ func (h *AppointmentHandler) CreateAppointment(c *fiber.Ctx) error {
 
 	if _, err := time.Parse("2006-01-02", req.AppointmentDate); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Invalid appointment_date format (expected YYYY-MM-DD)",
 		})
 	}
@@ -52,13 +52,13 @@ func (h *AppointmentHandler) CreateAppointment(c *fiber.Ctx) error {
 	endParsed, errEnd := time.Parse("15:04", req.EndTime)
 	if errStart != nil || errEnd != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Invalid time format (expected HH:MM)",
 		})
 	}
 	if !endParsed.After(startParsed) {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "end_time must be after start_time",
 		})
 	}
@@ -90,7 +90,7 @@ func (h *AppointmentHandler) CreateAppointment(c *fiber.Ctx) error {
 
 	if err := h.db.Create(&appointment).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Failed to create appointment (verify patient_id and doctor_id)",
 		})
 	}
@@ -98,7 +98,7 @@ func (h *AppointmentHandler) CreateAppointment(c *fiber.Ctx) error {
 	h.db.Preload("Patient").Preload("Doctor").First(&appointment, "id = ?", appointment.ID)
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"status": "success",
-		"data": appointment,
+		"data":   appointment,
 	})
 }
 
@@ -124,18 +124,18 @@ func (h *AppointmentHandler) GetAppointments(c *fiber.Ctx) error {
 
 	if err := query.Find(&appointments).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Failed to fetch appointments",
 		})
 	}
 
 	return c.JSON(fiber.Map{
 		"status": "success",
-		"data": appointments,
+		"data":   appointments,
 	})
 }
 
-func (h *AppointmentHandler) UpdateStatus(c *fiber.Ctx) error {
+func (h *AppointmentHandler) GetAppointmentByID(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -143,11 +143,34 @@ func (h *AppointmentHandler) UpdateStatus(c *fiber.Ctx) error {
 			"message": "Invalid appointment ID",
 		})
 	}
+	var appointment models.Appointment
+	if err := h.db.Preload("Patient.Allergies.Medication").Preload("Doctor").
+		Preload("MedicalRecord.Prescriptions.Medication").Preload("Invoice").
+		First(&appointment, "id = ?", id).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"status": "error",
+			"message": "Appointment not found",
+		})
+	}
+	return c.JSON(fiber.Map{
+		"status": "success",
+		"data":   appointment,
+	})
+}
+
+func (h *AppointmentHandler) UpdateStatus(c *fiber.Ctx) error {
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Invalid appointment ID",
+		})
+	}
 
 	var req dto.UpdateAppointmentStatusRequest
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Invalid request body",
 		})
 	}
@@ -161,19 +184,19 @@ func (h *AppointmentHandler) UpdateStatus(c *fiber.Ctx) error {
 	result := h.db.Model(&models.Appointment{}).Where("id = ?", id).Update("status", req.Status)
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Failed to update status",
 		})
 	}
 	if result.RowsAffected == 0 {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Appointment not found",
 		})
 	}
 
 	return c.JSON(fiber.Map{
-		"status": "success",
+		"status":  "success",
 		"message": "Appointment status updated",
 	})
 }
