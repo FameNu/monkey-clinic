@@ -36,13 +36,25 @@ func (h *InvoiceHandler) CreateInvoice(c *fiber.Ctx) error {
 	}
 
 	var appointment models.Appointment
-	if err := h.db.Preload("Doctor").
+	if err := h.db.Preload("Doctor").Preload("Invoice").
 		Preload("MedicalRecord.Prescriptions").
 		First(&appointment, "id = ?", req.AppointmentID).
 		Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"status":  "error",
 			"message": "Appointment not found",
+		})
+	}
+	if appointment.Status != "completed" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"status":  "error",
+			"message": "Invoice can only be created for completed appointments",
+		})
+	}
+	if appointment.Invoice != nil {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"status":  "error",
+			"message": "An invoice already exists for this appointment",
 		})
 	}
 
@@ -133,7 +145,8 @@ func (h *InvoiceHandler) PayInvoice(c *fiber.Ctx) error {
 	}
 
 	var updatedInvoice models.Invoice
-	h.db.First(&updatedInvoice, "id = ?", id)
+	h.db.Preload("Appointment.Patient").Preload("Appointment.Doctor").
+		Preload("Appointment.MedicalRecord").First(&updatedInvoice, "id = ?", id)
 
 	return c.JSON(fiber.Map{
 		"status": "success",
@@ -143,7 +156,7 @@ func (h *InvoiceHandler) PayInvoice(c *fiber.Ctx) error {
 
 func (h *InvoiceHandler) GetInvoices(c *fiber.Ctx) error {
 	var invoices []models.Invoice
-	query := h.db.Order("created_at desc")
+	query := h.db.Preload("Appointment.Patient").Preload("Appointment.Doctor").Preload("Appointment.MedicalRecord").Order("created_at desc")
 	if status := c.Query("status"); status != "" {
 		query = query.Where("payment_status = ?", status)
 	}
