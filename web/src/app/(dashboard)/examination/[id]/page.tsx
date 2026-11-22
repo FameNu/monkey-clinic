@@ -28,6 +28,7 @@ import {
   detectAllergyConflicts,
   PrescriptionBuilder,
 } from '@/components/examination/PrescriptionBuilder'
+import { formatStatus } from '@/lib/helper/textFormat'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -90,6 +91,8 @@ export default function ExaminationPage({ params }: PageProps) {
     const med = medications.find((m) => m.id === item.medication_id)
     return med !== undefined && item.quantity > med.stock_quantity
   })
+
+  const statusLabelHumanReadable = formatStatus(appointment.status)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -161,7 +164,7 @@ export default function ExaminationPage({ params }: PageProps) {
         </Box>
 
         <Chip
-          label={`สถานะ: ${appointment.status}`}
+          label={`สถานะ: ${statusLabelHumanReadable}`}
           color={appointment.status === 'completed' ? 'success' : 'primary'}
         />
       </Box>
@@ -171,7 +174,7 @@ export default function ExaminationPage({ params }: PageProps) {
 
       {isReadOnly && (
         <Alert severity='info' sx={{ mb: 3 }}>
-          รายการนัดหมายนี้อยู่ในสถานะ <strong>{appointment.status}</strong>{' '}
+          รายการนัดหมายนี้อยู่ในสถานะ <strong>{statusLabelHumanReadable}</strong>{' '}
           ไม่สามารถแก้ไขผลตรวจได้
         </Alert>
       )}
