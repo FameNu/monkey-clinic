@@ -172,7 +172,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
                 selected={active}
                 onClick={() => setMobileOpen(false)}
                 sx={{
-                  borderRadius: 2,
+                  borderRadius: .5,
                   '&.Mui-selected': {
                     bgcolor: 'primary.main',
                     color: 'white',
@@ -196,7 +196,7 @@ function DashboardLayoutContent({ children }: DashboardLayoutProps) {
       <Box sx={{ p: 2 }}>
         <ListItemButton
           onClick={handleLogout}
-          sx={{ borderRadius: 2, color: 'error.main' }}
+          sx={{ borderRadius: .5, color: 'error.main' }}
         >
           <ListItemIcon sx={{ minWidth: 38, color: 'error.main' }}>
             <LogoutOutlinedIcon />
