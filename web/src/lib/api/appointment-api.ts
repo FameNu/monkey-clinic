@@ -1,5 +1,6 @@
 import apiClient from '@/lib/axios-instance'
 import {
+  ApiResponse,
   Appointment,
   AppointmentStatus,
   AppointmentFilters,
@@ -16,14 +17,14 @@ export const appointmentApi = () => {
 
     const query = params.toString()
     const url = query ? `/appointments?${query}` : '/appointments'
-    const response = await apiClient.get<{ data: Appointment[] }>(url)
+    const response = await apiClient.get<ApiResponse<Appointment[]>>(url)
     return response.data.data || []
   }
 
   const createAppointment = async (
     payload: CreateAppointmentRequest,
   ): Promise<Appointment> => {
-    const response = await apiClient.post<{ data: Appointment }>(
+    const response = await apiClient.post<ApiResponse<Appointment>>(
       '/appointments',
       payload,
     )
@@ -38,7 +39,7 @@ export const appointmentApi = () => {
   }
 
   const getAppointmentById = async (id: string): Promise<Appointment> => {
-    const response = await apiClient.get<{ data: Appointment }>(
+    const response = await apiClient.get<ApiResponse<Appointment>>(
       `/appointments/${id}`,
     )
     return response.data.data

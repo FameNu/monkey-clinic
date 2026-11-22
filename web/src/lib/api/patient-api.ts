@@ -1,5 +1,6 @@
 import apiClient from '@/lib/axios-instance'
 import {
+  ApiResponse,
   Patient,
   PatientAllergy,
   CreatePatientPayload,
@@ -15,19 +16,19 @@ export const patientApi = () => {
     const query = params.toString()
     const url = query ? `/patients?${query}` : '/patients'
 
-    const response = await apiClient.get<{ data: Patient[] }>(url)
+    const response = await apiClient.get<ApiResponse<Patient[]>>(url)
     return response.data.data || []
   }
 
   const getPatientById = async (id: string): Promise<Patient> => {
-    const response = await apiClient.get<{ data: Patient }>(`/patients/${id}`)
+    const response = await apiClient.get<ApiResponse<Patient>>(`/patients/${id}`)
     return response.data.data
   }
 
   const createPatient = async (
     payload: CreatePatientPayload,
   ): Promise<Patient> => {
-    const response = await apiClient.post<{ data: Patient }>(
+    const response = await apiClient.post<ApiResponse<Patient>>(
       '/patients',
       payload,
     )
@@ -38,7 +39,7 @@ export const patientApi = () => {
     patientId: string,
     payload: AddPatientAllergyPayload,
   ): Promise<PatientAllergy> => {
-    const response = await apiClient.post<{ data: PatientAllergy }>(
+    const response = await apiClient.post<ApiResponse<PatientAllergy>>(
       `/patients/${patientId}/allergies`,
       payload,
     )
