@@ -82,7 +82,7 @@ const DOCTORS = [
     license: 'ว.00001',
     fee: '600 บาท',
     schedule: 'จันทร์, พุธ, ศุกร์ (10:00 - 18:00)',
-    image: '/images/doctors/doc-1.jpeg',
+    image: '/images/doctors/doc-01.jpeg',
   },
   {
     name: 'นพ. ธีรภัทร อัศวเมธี',
@@ -90,7 +90,7 @@ const DOCTORS = [
     license: 'ว.00002',
     fee: '700 บาท',
     schedule: 'อังคาร, พฤหัสบดี, เสาร์ (09:00 - 17:00)',
-    image: '/images/doctors/doc-2.jpeg',
+    image: '/images/doctors/doc-02.jpeg',
   },
   {
     name: 'นพ. ปริญญา รัตนโชติ',
@@ -98,7 +98,7 @@ const DOCTORS = [
     license: 'ว.00003',
     fee: '600 บาท',
     schedule: 'พุธ, เสาร์, อาทิตย์ (10:00 - 19:00)',
-    image: '/images/doctors/doc-3.jpeg',
+    image: '/images/doctors/doc-03.jpeg',
   },
   {
     name: 'พญ. กมลชนก เจริญสุข',
@@ -106,7 +106,7 @@ const DOCTORS = [
     license: 'ว.00004',
     fee: '400 บาท',
     schedule: 'ทุกวัน (09:00 - 20:00)',
-    image: '/images/doctors/doc-4.jpeg',
+    image: '/images/doctors/doc-04.jpeg',
   },
 ]
 
@@ -159,7 +159,11 @@ export default function MonkeyClinicLandingPage() {
         <Container maxWidth='lg'>
           <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
             <Stack direction='row' sx={{ spacing: 1.5, alignItems: 'center' }}>
-              <LocalHospitalIcon color='primary' fontSize='large' sx={{ mr: 0.75 }} />
+              <LocalHospitalIcon
+                color='primary'
+                fontSize='large'
+                sx={{ mr: 0.75 }}
+              />
               <Box>
                 <Typography
                   variant='h6'
@@ -690,18 +694,13 @@ export default function MonkeyClinicLandingPage() {
             <Grid size={{ xs: 12, md: 5 }}>
               <Stack
                 direction='row'
-                sx={{ spacing: 1.5, alignItems: 'center', mb: 2 }}
+                sx={{ alignItems: 'center' }}
               >
-                <Avatar
-                  sx={{
-                    bgcolor: palette.primary.light,
-                    color: palette.secondary.contrastText,
-                    fontWeight: 800,
-                    mr: 0.75,
-                  }}
-                >
-                  🍌
-                </Avatar>
+                <LocalHospitalIcon
+                  color='primary'
+                  fontSize='large'
+                  sx={{ mr: 0.75 }}
+                />
                 <Typography variant='h5' sx={{ fontWeight: 800 }}>
                   MONKEY CLINIC
                 </Typography>
@@ -738,11 +737,8 @@ export default function MonkeyClinicLandingPage() {
               >
                 ติดต่อและนัดหมาย
               </Typography>
-              <Stack sx={{ gap: .5 }}>
-                <Stack
-                  direction='row'
-                  sx={{ gap: 1, alignItems: 'center' }}
-                >
+              <Stack sx={{ gap: 0.5 }}>
+                <Stack direction='row' sx={{ gap: 1, alignItems: 'center' }}>
                   <PhoneInTalk
                     sx={{ color: palette.primary.light, fontSize: 20 }}
                   />
@@ -750,10 +746,7 @@ export default function MonkeyClinicLandingPage() {
                     02-123-4567 / 089-999-8888
                   </Typography>
                 </Stack>
-                <Stack
-                  direction='row'
-                  sx={{ gap: 1, alignItems: 'center' }}
-                >
+                <Stack direction='row' sx={{ gap: 1, alignItems: 'center' }}>
                   <AccessTime
                     sx={{ color: palette.primary.light, fontSize: 20 }}
                   />
@@ -772,7 +765,7 @@ export default function MonkeyClinicLandingPage() {
                     variant='body2'
                     sx={{ color: alpha(palette.background.paper, 0.82) }}
                   >
-                    99/9 ถนนพระราม 24 แขวงบางมด เขตทุ่งครุ กรุงเทพมหานคร 10400
+                    99/9 ถนนพระราม 24 แขวงบางมด เขตทุ่งครุ กรุงเทพมหานคร 10410
                   </Typography>
                 </Stack>
               </Stack>
