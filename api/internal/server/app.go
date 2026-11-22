@@ -1,6 +1,9 @@
 package server
 
 import (
+	"os"
+	"strings"
+
 	"github.com/FameNu/clinic-management-system/api/internal/handler"
 	"github.com/FameNu/clinic-management-system/api/internal/middleware"
 	"github.com/gofiber/fiber/v2"
@@ -12,7 +15,14 @@ import (
 func New(db *gorm.DB) *fiber.App {
 	app := fiber.New(fiber.Config{AppName: "Clinic Management System"})
 	app.Use(logger.New())
-	app.Use(cors.New())
+	allowedOrigins := strings.TrimSpace(os.Getenv("ALLOWED_ORIGINS"))
+	if allowedOrigins == "" {
+		allowedOrigins = strings.TrimSpace(os.Getenv("CORS_ALLOWED_ORIGINS"))
+	}
+	if allowedOrigins == "" {
+		allowedOrigins = "*"
+	}
+	app.Use(cors.New(cors.Config{AllowOrigins: allowedOrigins}))
 
 	api := app.Group("/api/v1")
 	api.Get("/health", func(c *fiber.Ctx) error {
