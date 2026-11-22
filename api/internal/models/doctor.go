@@ -12,6 +12,7 @@ type Doctor struct {
 	LicenseNumber   string           `gorm:"type:varchar(50);uniqueIndex;not null" json:"license_number"`
 	Phone           string           `gorm:"type:varchar(20)" json:"phone"`
 	ConsultationFee float64          `gorm:"type:decimal(10,2);default:500.00" json:"consultation_fee"`
+	Notes           string           `gorm:"type:text" json:"notes"`
 	IsActive        bool             `gorm:"default:true" json:"is_active"`
 	Schedules       []DoctorSchedule `gorm:"foreignKey:DoctorID" json:"schedules,omitempty"`
 }

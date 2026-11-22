@@ -1,15 +1,19 @@
 package middleware
 
 import (
+	"errors"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/FameNu/clinic-management-system/api/internal/models"
 	"github.com/FameNu/clinic-management-system/api/internal/utils"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
-func AuthRequired() fiber.Handler {
+func AuthRequired(db *gorm.DB) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		authHeader := strings.TrimSpace(c.Get("Authorization"))
 		if authHeader == "" {
@@ -48,8 +52,20 @@ func AuthRequired() fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).JSON(response)
 		}
 
-		c.Locals("user_id", claims.UserID)
-		c.Locals("role", claims.Role)
+		var user struct {
+			ID       uuid.UUID
+			Role     string
+			IsActive bool
+		}
+		err = db.Model(&models.User{}).Select("id, role, is_active").Where("id = ?", claims.UserID).Take(&user).Error
+		if errors.Is(err, gorm.ErrRecordNotFound) || (err == nil && !user.IsActive) {
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "error", "message": "Account is inactive or no longer exists"})
+		}
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"status": "error", "message": "Failed to verify account"})
+		}
+		c.Locals("user_id", user.ID)
+		c.Locals("role", user.Role)
 
 		return c.Next()
 	}
