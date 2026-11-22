@@ -156,7 +156,13 @@ function DashboardContent() {
           size='small'
           value={selectedDate}
           onChange={(event) => setSelectedDate(event.target.value)}
-          sx={{ minWidth: 220 }}
+          sx={{
+            minWidth: 220,
+            display: 'flex',
+            flexDirection: 'row',
+            gap: 1.5,
+            alignItems: 'center',
+          }}
         />
         <Button
           variant={selectedDate === bangkokDate() ? 'contained' : 'outlined'}
@@ -177,7 +183,11 @@ function DashboardContent() {
           severity='warning'
           icon={<WarningAmberIcon />}
           action={
-            <Button color='inherit' size='small' onClick={() => router.push('/medications')}>
+            <Button
+              color='inherit'
+              size='small'
+              onClick={() => router.push('/medications')}
+            >
               ดูคลังยา
             </Button>
           }
@@ -191,8 +201,17 @@ function DashboardContent() {
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
         {kpis.map((card) => (
           <Grid key={card.title} size={{ xs: 12, sm: 6, lg: 3 }}>
-            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Card
+              elevation={0}
+              sx={{ border: '1px solid', borderColor: 'divider' }}
+            >
+              <CardContent
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
                 <Box>
                   <Typography variant='body2' color='text.secondary'>
                     {card.title}
@@ -201,7 +220,14 @@ function DashboardContent() {
                     {card.value}
                   </Typography>
                 </Box>
-                <Box sx={{ p: 1.5, borderRadius: 2.5, bgcolor: card.bg, display: 'flex' }}>
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 2.5,
+                    bgcolor: card.bg,
+                    display: 'flex',
+                  }}
+                >
                   {card.icon}
                 </Box>
               </CardContent>
@@ -219,9 +245,14 @@ function DashboardContent() {
           ['ค้างชำระ', summary.revenue.unpaid_total],
         ].map(([label, amount]) => (
           <Grid key={label} size={{ xs: 12, sm: 6, lg: 3 }}>
-            <Card elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
+            <Card
+              elevation={0}
+              sx={{ border: '1px solid', borderColor: 'divider' }}
+            >
               <CardContent>
-                <Typography variant='body2' color='text.secondary'>{label}</Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  {label}
+                </Typography>
                 <Typography variant='h6' sx={{ mt: 0.5, fontWeight: 700 }}>
                   {formatCurrency(amount as number)}
                 </Typography>
@@ -232,24 +263,54 @@ function DashboardContent() {
       </Grid>
 
       <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-        <Chip label={`เสร็จสิ้น ${summary.appointment_statuses.completed}`} color='success' />
-        <Chip label={`รอตรวจ ${summary.appointment_statuses.waiting}`} color='primary' />
-        <Chip label={`ยกเลิก ${summary.appointment_statuses.cancelled}`} color='default' />
-        <Chip label={`ค้างชำระ ${formatCurrency(summary.revenue.unpaid_total)}`} color='warning' />
+        <Chip
+          label={`เสร็จสิ้น ${summary.appointment_statuses.completed}`}
+          color='success'
+        />
+        <Chip
+          label={`รอตรวจ ${summary.appointment_statuses.waiting}`}
+          color='primary'
+        />
+        <Chip
+          label={`ยกเลิก ${summary.appointment_statuses.cancelled}`}
+          color='default'
+        />
+        <Chip
+          label={`ค้างชำระ ${formatCurrency(summary.revenue.unpaid_total)}`}
+          color='warning'
+        />
       </Box>
 
       <Typography variant='h6' sx={{ mb: 2, fontWeight: 700 }}>
         รายชื่อผู้ป่วยและการเรียกเก็บเงิน
       </Typography>
       {summary.visits.length === 0 ? (
-        <EmptyState title='ไม่มีนัดหมายในวันที่เลือก' description='เลือกวันอื่นเพื่อดูรายงานย้อนหลัง' />
+        <EmptyState
+          title='ไม่มีนัดหมายในวันที่เลือก'
+          description='เลือกวันอื่นเพื่อดูรายงานย้อนหลัง'
+        />
       ) : (
-        <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider' }}>
+        <TableContainer
+          component={Paper}
+          elevation={0}
+          sx={{ border: '1px solid', borderColor: 'divider' }}
+        >
           <Table sx={{ minWidth: 1050 }}>
             <TableHead sx={{ bgcolor: 'grey.50' }}>
               <TableRow>
-                {['เวลา', 'รหัส HN', 'ชื่อผู้ป่วย', 'แพทย์', 'ผลวินิจฉัย', 'สถานะ', 'เรียกเก็บ', 'ชำระเงิน'].map((head) => (
-                  <TableCell key={head} sx={{ fontWeight: 700 }}>{head}</TableCell>
+                {[
+                  'เวลา',
+                  'รหัส HN',
+                  'ชื่อผู้ป่วย',
+                  'แพทย์',
+                  'ผลวินิจฉัย',
+                  'สถานะ',
+                  'เรียกเก็บ',
+                  'ชำระเงิน',
+                ].map((head) => (
+                  <TableCell key={head} sx={{ fontWeight: 700 }}>
+                    {head}
+                  </TableCell>
                 ))}
               </TableRow>
             </TableHead>
@@ -261,10 +322,22 @@ function DashboardContent() {
                   <TableCell>{visit.patient_name}</TableCell>
                   <TableCell>{visit.doctor_name}</TableCell>
                   <TableCell>{visit.diagnosis || '-'}</TableCell>
-                  <TableCell><AppointmentStatusBadge status={visit.visit_status} /></TableCell>
+                  <TableCell>
+                    <AppointmentStatusBadge status={visit.visit_status} />
+                  </TableCell>
                   <TableCell>{formatCurrency(visit.billed_amount)}</TableCell>
                   <TableCell>
-                    <Chip size='small' label={visit.payment_status} color={visit.payment_status === 'paid' ? 'success' : visit.payment_status === 'unpaid' ? 'warning' : 'default'} />
+                    <Chip
+                      size='small'
+                      label={visit.payment_status}
+                      color={
+                        visit.payment_status === 'paid'
+                          ? 'success'
+                          : visit.payment_status === 'unpaid'
+                            ? 'warning'
+                            : 'default'
+                      }
+                    />
                   </TableCell>
                 </TableRow>
               ))}
