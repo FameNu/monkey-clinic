@@ -10,8 +10,8 @@ import {
   DialogContent,
   DialogTitle,
   MenuItem,
-  TextField,
 } from '@mui/material'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 import { usePatientStore } from '@/store/usePatientStore'
 
 interface Props {
@@ -99,7 +99,7 @@ export default function CreatePatientModal({ open, onClose }: Props) {
             sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 0.5 }}
           >
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
+              <LabeledTextField
                 select
                 label='คำนำหน้า'
                 value={prefix}
@@ -112,9 +112,9 @@ export default function CreatePatientModal({ open, onClose }: Props) {
                     {item}
                   </MenuItem>
                 ))}
-              </TextField>
+              </LabeledTextField>
 
-              <TextField
+              <LabeledTextField
                 label='ชื่อ - นามสกุล'
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -124,7 +124,7 @@ export default function CreatePatientModal({ open, onClose }: Props) {
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
+              <LabeledTextField
                 label='เบอร์โทรศัพท์'
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -132,7 +132,7 @@ export default function CreatePatientModal({ open, onClose }: Props) {
                 fullWidth
               />
 
-              <TextField
+              <LabeledTextField
                 select
                 label='เพศ'
                 value={gender}
@@ -142,20 +142,19 @@ export default function CreatePatientModal({ open, onClose }: Props) {
               >
                 <MenuItem value='male'>ชาย</MenuItem>
                 <MenuItem value='female'>หญิง</MenuItem>
-              </TextField>
+              </LabeledTextField>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
+              <LabeledTextField
                 label='วันเดือนปีเกิด'
                 type='date'
                 value={dateOfBirth}
                 onChange={(e) => setDateOfBirth(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
                 fullWidth
               />
 
-              <TextField
+              <LabeledTextField
                 select
                 label='กรุ๊ปเลือด'
                 value={bloodType}
@@ -170,10 +169,10 @@ export default function CreatePatientModal({ open, onClose }: Props) {
                     {bg}
                   </MenuItem>
                 ))}
-              </TextField>
+              </LabeledTextField>
             </Box>
 
-            <TextField
+            <LabeledTextField
               label='โรคประจำตัว (ถ้ามี)'
               value={chronicDiseases}
               onChange={(e) => setChronicDiseases(e.target.value)}

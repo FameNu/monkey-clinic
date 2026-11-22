@@ -11,9 +11,9 @@ import {
   MenuItem,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined'
 
@@ -230,7 +230,7 @@ export function PrescriptionBuilder({
                     alignItems: 'center',
                   }}
                 >
-                  <TextField
+                  <LabeledTextField
                     select
                     label='เลือกตัวยา'
                     size='small'
@@ -253,9 +253,9 @@ export function PrescriptionBuilder({
                         {med.price_per_unit})
                       </MenuItem>
                     ))}
-                  </TextField>
+                  </LabeledTextField>
 
-                  <TextField
+                  <LabeledTextField
                     label='จำนวน'
                     type='number'
                     size='small'
@@ -289,7 +289,7 @@ export function PrescriptionBuilder({
                   </IconButton>
                 </Box>
 
-                <TextField
+                <LabeledTextField
                   label='วิธีรับประทาน / คำแนะนำการใช้ยา'
                   size='small'
                   value={item.dosage_instruction}

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/useAuthStore'
 
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
-import { Alert, Box, Button, Card, CardContent, Container, IconButton, InputAdornment, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Card, CardContent, Container, FormControl, FormLabel, IconButton, InputAdornment, TextField, Typography } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 export default function LoginPage() {
@@ -62,43 +62,47 @@ export default function LoginPage() {
               onSubmit={handleSubmit}
               sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
             >
-              <TextField
-                label='อีเมล (Email)'
-                type='email'
-                value={email}
-                onChange={(e) => {
-                  clearLoginError()
-                  setEmail(e.target.value)
-                }}
-                required
-                fullWidth
-                autoFocus
-              />
-              <TextField
-                label='รหัสผ่าน (Password)'
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => {
-                  clearLoginError()
-                  setPassword(e.target.value)
-                }}
-                required
-                fullWidth
-                slotProps={{
-                  input: {
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge='end'
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  },
-                }}
-              />
+              <FormControl fullWidth>
+                <FormLabel required>อีเมล (Email)</FormLabel>
+                <TextField
+                  type='email'
+                  value={email}
+                  onChange={(e) => {
+                    clearLoginError()
+                    setEmail(e.target.value)
+                  }}
+                  required
+                  fullWidth
+                  autoFocus
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <FormLabel required>รหัสผ่าน (Password)</FormLabel>
+                <TextField
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => {
+                    clearLoginError()
+                    setPassword(e.target.value)
+                  }}
+                  required
+                  fullWidth
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position='end'>
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge='end'
+                          >
+                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              </FormControl>
               <Button
                 type='submit'
                 variant='contained'

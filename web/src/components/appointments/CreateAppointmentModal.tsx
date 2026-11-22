@@ -15,8 +15,8 @@ import {
   DialogContent,
   DialogTitle,
   MenuItem,
-  TextField,
 } from '@mui/material'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 
 interface Props {
   open: boolean
@@ -114,7 +114,7 @@ export function CreateAppointmentModal({
           <Box
             sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 0.5 }}
           >
-            <TextField
+            <LabeledTextField
               select
               label='เลือกคนไข้'
               value={patientId}
@@ -128,9 +128,9 @@ export function CreateAppointmentModal({
                   {p.full_name} ({p.phone})
                 </MenuItem>
               ))}
-            </TextField>
+            </LabeledTextField>
 
-            <TextField
+            <LabeledTextField
               select
               label='เลือกแพทย์ผู้ตรวจ'
               value={doctorId}
@@ -146,40 +146,37 @@ export function CreateAppointmentModal({
                     {d.full_name} ({d.specialization})
                   </MenuItem>
                 ))}
-            </TextField>
+            </LabeledTextField>
 
-            <TextField
+            <LabeledTextField
               label='วันที่นัดหมาย'
               type='date'
               value={appointmentDate}
               onChange={(e) => setAppointmentDate(e.target.value)}
-              slotProps={{ inputLabel: { shrink: true } }}
               required
               fullWidth
             />
 
             <Box sx={{ display: 'flex', gap: 2 }}>
-              <TextField
+              <LabeledTextField
                 label='เวลาเริ่ม (HH:MM)'
                 type='time'
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
                 required
                 fullWidth
               />
-              <TextField
+              <LabeledTextField
                 label='เวลาสิ้นสุด (HH:MM)'
                 type='time'
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                slotProps={{ inputLabel: { shrink: true } }}
                 required
                 fullWidth
               />
             </Box>
 
-            <TextField
+            <LabeledTextField
               label='อาการเบื้องต้น / สาเหตุที่นัด'
               value={reason}
               onChange={(e) => setReason(e.target.value)}

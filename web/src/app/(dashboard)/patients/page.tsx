@@ -13,7 +13,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material'
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1'
@@ -28,6 +27,7 @@ import ErrorState from '@/components/common/StateViews/ErrorState'
 import LoadingState from '@/components/common/StateViews/LoadingState'
 import CreatePatientModal from '@/components/patients/CreatePatientModal'
 import PatientDetailDrawer from '@/components/patients/PatientDetailDrawer'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 
 export default function PatientsPage() {
   const user = useAuthStore((state) => state.user)
@@ -104,9 +104,10 @@ export default function PatientsPage() {
         elevation={0}
         sx={{ p: 2, mb: 3, border: '1px solid', borderColor: 'divider' }}
       >
-        <TextField
+        <LabeledTextField
           size='small'
           fullWidth
+          label='ค้นหาผู้ป่วย'
           placeholder='ค้นหาด้วย รหัส HN, ชื่อ-นามสกุล หรือ เบอร์โทรศัพท์...'
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}

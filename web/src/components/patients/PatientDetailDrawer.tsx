@@ -16,13 +16,13 @@ import {
   MenuItem,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutlined'
 import AllergySeverityBadge from '@/components/common/StatusBadge/AllergySeverityBadge'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 
 interface Props {
   patient: Patient | null
@@ -210,7 +210,7 @@ export default function PatientDetailDrawer({
                 onSubmit={handleAddAllergy}
                 sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
               >
-                <TextField
+                <LabeledTextField
                   select
                   label='เลือกตัวยาที่แพ้'
                   size='small'
@@ -224,9 +224,9 @@ export default function PatientDetailDrawer({
                       {med.name} ({med.generic_name || med.code})
                     </MenuItem>
                   ))}
-                </TextField>
+                </LabeledTextField>
 
-                <TextField
+                <LabeledTextField
                   select
                   label='ระดับความรุนแรง'
                   size='small'
@@ -240,9 +240,9 @@ export default function PatientDetailDrawer({
                   <MenuItem value='mild'>เล็กน้อย (Mild)</MenuItem>
                   <MenuItem value='moderate'>ปานกลาง (Moderate)</MenuItem>
                   <MenuItem value='severe'>รุนแรง (Severe)</MenuItem>
-                </TextField>
+                </LabeledTextField>
 
-                <TextField
+                <LabeledTextField
                   label='อาการที่พบ'
                   size='small'
                   value={reactionNote}

@@ -9,8 +9,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
 } from '@mui/material'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 import { CreateMedicationRequest } from '@/types'
 import { useMedicationStore } from '@/store/useMedicationStore'
 
@@ -63,32 +63,32 @@ export function CreateMedicationModal({ open, onClose }: Props) {
               gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
             }}
           >
-            <TextField
+            <LabeledTextField
               label='รหัสยา'
               value={payload.code}
               onChange={(e) => setPayload({ ...payload, code: e.target.value })}
               required
             />
-            <TextField
+            <LabeledTextField
               label='ชื่อยา'
               value={payload.name}
               onChange={(e) => setPayload({ ...payload, name: e.target.value })}
               required
             />
-            <TextField
+            <LabeledTextField
               label='ชื่อสามัญ'
               value={payload.generic_name}
               onChange={(e) =>
                 setPayload({ ...payload, generic_name: e.target.value })
               }
             />
-            <TextField
+            <LabeledTextField
               label='หน่วย'
               value={payload.unit}
               onChange={(e) => setPayload({ ...payload, unit: e.target.value })}
               required
             />
-            <TextField
+            <LabeledTextField
               label='ราคาต่อหน่วย (บาท)'
               type='number'
               slotProps={{ htmlInput: { min: 0, step: '0.01' } }}
@@ -101,7 +101,7 @@ export function CreateMedicationModal({ open, onClose }: Props) {
               }
               required
             />
-            <TextField
+            <LabeledTextField
               label='จำนวนเริ่มต้น'
               type='number'
               slotProps={{ htmlInput: { min: 0 } }}
@@ -114,7 +114,7 @@ export function CreateMedicationModal({ open, onClose }: Props) {
               }
               required
             />
-            <TextField
+            <LabeledTextField
               label='แจ้งเตือนเมื่อเหลือ'
               type='number'
               slotProps={{ htmlInput: { min: 0 } }}
@@ -127,7 +127,7 @@ export function CreateMedicationModal({ open, onClose }: Props) {
               }
               required
             />
-            <TextField
+            <LabeledTextField
               label='หมายเหตุ'
               value={payload.note}
               onChange={(e) => setPayload({ ...payload, note: e.target.value })}

@@ -8,8 +8,8 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  TextField,
 } from '@mui/material'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 import { Medication } from '@/types'
 import { useMedicationStore } from '@/store/useMedicationStore'
 
@@ -49,7 +49,7 @@ export function RestockModal({ medication, onClose }: Props) {
               {error}
             </Alert>
           )}
-          <TextField
+          <LabeledTextField
             fullWidth
             autoFocus
             label={`จำนวนที่เติม${medication ? ` (${medication.unit})` : ''}`}

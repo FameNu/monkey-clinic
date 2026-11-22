@@ -15,7 +15,6 @@ import {
   Grid,
   Paper,
   Stack,
-  TextField,
   Typography,
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
@@ -23,6 +22,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import HistoryIcon from '@mui/icons-material/History'
 import LoadingState from '@/components/common/StateViews/LoadingState'
 import ErrorState from '@/components/common/StateViews/ErrorState'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 import { PatientAllergyBanner } from '@/components/examination/PatientAllergyBanner'
 import {
   detectAllergyConflicts,
@@ -196,7 +196,7 @@ export default function ExaminationPage({ params }: PageProps) {
                 บันทึกการตรวจและคำวินิจฉัย
               </Typography>
               <Stack spacing={2}>
-                <TextField
+                <LabeledTextField
                   label='อาการสำคัญ (Symptoms)'
                   multiline
                   rows={2}
@@ -207,7 +207,7 @@ export default function ExaminationPage({ params }: PageProps) {
                   fullWidth
                 />
 
-                <TextField
+                <LabeledTextField
                   label='ผลการวินิจฉัยโรค (Diagnosis)'
                   value={diagnosis}
                   onChange={(e) => setDiagnosis(e.target.value)}
@@ -217,7 +217,7 @@ export default function ExaminationPage({ params }: PageProps) {
                   fullWidth
                 />
 
-                <TextField
+                <LabeledTextField
                   label='แผนการรักษา / คำแนะนำเพิ่มเติม (Treatment Notes)'
                   multiline
                   rows={2}

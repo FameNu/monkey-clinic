@@ -20,7 +20,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
@@ -33,6 +32,7 @@ import ErrorState from '@/components/common/StateViews/ErrorState'
 import LoadingState from '@/components/common/StateViews/LoadingState'
 import { CreateAppointmentModal } from '@/components/appointments/CreateAppointmentModal'
 import DashboardAuthGuard from '@/components/auth/DashboardAuthGuard'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 
 const getTodayLocalString = () => {
   const today = new Date()
@@ -150,16 +150,15 @@ function AppointmentsContent() {
         sx={{ p: 2, mb: 3, border: '1px solid', borderColor: 'divider' }}
       >
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <TextField
+          <LabeledTextField
             label='วันที่นัดหมาย'
             type='date'
             size='small'
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            slotProps={{ inputLabel: { shrink: true } }}
             sx={{ minWidth: 200 }}
           />
-          <TextField
+          <LabeledTextField
             select
             label='สถานะคิว'
             size='small'
@@ -176,7 +175,7 @@ function AppointmentsContent() {
             <MenuItem value='completed'>ตรวจเสร็จสิ้น</MenuItem>
             <MenuItem value='cancelled'>ยกเลิก</MenuItem>
             <MenuItem value='no_show'>ไม่มาตามนัด</MenuItem>
-          </TextField>
+          </LabeledTextField>
           {selectedDate && (
             <Button
               size='small'
