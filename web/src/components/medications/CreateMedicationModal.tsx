@@ -11,17 +11,20 @@ import {
   Stack,
 } from '@mui/material'
 import { LabeledTextField } from '@/components/common/LabeledTextField'
-import { CreateMedicationRequest } from '@/types'
+import { CreateMedicationRequest, Medication } from '@/types'
 import { useMedicationStore } from '@/store/useMedicationStore'
 
 interface Props {
   open: boolean
   onClose: () => void
+  medication?: Medication | null
 }
 const initial: CreateMedicationRequest = {
   code: '',
   name: '',
   generic_name: '',
+  category: '',
+  allergy_warnings: '',
   unit: 'เม็ด',
   price_per_unit: 0,
   stock_quantity: 0,
@@ -29,37 +32,63 @@ const initial: CreateMedicationRequest = {
   note: '',
 }
 
-export function CreateMedicationModal({ open, onClose }: Props) {
-  const { createMedication, isSubmitting } = useMedicationStore()
+export function CreateMedicationModal({
+  open,
+  onClose,
+  medication = null,
+}: Props) {
+  const { createMedication, updateMedication, isSubmitting } =
+    useMedicationStore()
 
-  const [payload, setPayload] = useState(initial)
+  const [payload, setPayload] = useState<CreateMedicationRequest>(() =>
+    medication
+      ? {
+          code: medication.code,
+          name: medication.name,
+          generic_name: medication.generic_name ?? '',
+          category: medication.category ?? '',
+          allergy_warnings: medication.allergy_warnings ?? '',
+          unit: medication.unit,
+          price_per_unit: medication.price_per_unit,
+          stock_quantity: medication.stock_quantity,
+          min_stock_alert: medication.min_stock_alert,
+          note: medication.note ?? '',
+        }
+      : initial,
+  )
   const [error, setError] = useState<string | null>(null)
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setError(null)
     try {
-      await createMedication(payload)
+      if (medication) {
+        await updateMedication(medication.id, payload)
+      } else {
+        await createMedication(payload)
+      }
       setPayload(initial)
       onClose()
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'เพิ่มยาไม่สำเร็จ')
+      setError(
+        reason instanceof Error ? reason.message : 'บันทึกข้อมูลยาไม่สำเร็จ',
+      )
     }
   }
-  
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
       <form onSubmit={submit}>
-        <DialogTitle>เพิ่มรายการยา</DialogTitle>
+        <DialogTitle>
+          {medication ? 'แก้ไขรายการยา' : 'เพิ่มรายการยา'}
+        </DialogTitle>
         <DialogContent dividers>
           {error && (
             <Alert severity='error' sx={{ mb: 2 }}>
               {error}
             </Alert>
           )}
-          <Stack
-            spacing={1.5}
-          >
+          <Stack spacing={1.5}>
             <LabeledTextField
               label='รหัสยา'
               value={payload.code}
@@ -78,6 +107,23 @@ export function CreateMedicationModal({ open, onClose }: Props) {
               onChange={(e) =>
                 setPayload({ ...payload, generic_name: e.target.value })
               }
+              required
+            />
+            <LabeledTextField
+              label='ชนิดยา / หมวดหมู่'
+              value={payload.category}
+              onChange={(e) =>
+                setPayload({ ...payload, category: e.target.value })
+              }
+            />
+            <LabeledTextField
+              label='คำเตือนการแพ้ยา'
+              value={payload.allergy_warnings}
+              onChange={(e) =>
+                setPayload({ ...payload, allergy_warnings: e.target.value })
+              }
+              multiline
+              rows={2}
             />
             <LabeledTextField
               label='หน่วย'
@@ -88,7 +134,7 @@ export function CreateMedicationModal({ open, onClose }: Props) {
             <LabeledTextField
               label='ราคาต่อหน่วย (บาท)'
               type='number'
-              slotProps={{ htmlInput: { min: 0, step: '0.01' } }}
+              slotProps={{ htmlInput: { min: 0.01, step: '0.01' } }}
               value={payload.price_per_unit}
               onChange={(e) =>
                 setPayload({
@@ -138,7 +184,11 @@ export function CreateMedicationModal({ open, onClose }: Props) {
             ยกเลิก
           </Button>
           <Button type='submit' variant='contained' disabled={isSubmitting}>
-            {isSubmitting ? 'กำลังบันทึก...' : 'เพิ่มยา'}
+            {isSubmitting
+              ? 'กำลังบันทึก...'
+              : medication
+                ? 'บันทึกการแก้ไข'
+                : 'เพิ่มยา'}
           </Button>
         </DialogActions>
       </form>

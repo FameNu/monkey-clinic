@@ -3,6 +3,8 @@ export interface Medication {
   code: string
   name: string
   generic_name?: string
+  category?: string
+  allergy_warnings?: string
   unit: string
   price_per_unit: number
   stock_quantity: number
@@ -14,12 +16,16 @@ export interface CreateMedicationRequest {
   code: string
   name: string
   generic_name: string
+  category: string
+  allergy_warnings: string
   unit: string
   price_per_unit: number
   stock_quantity: number
   min_stock_alert: number
   note?: string
 }
+
+export type UpdateMedicationRequest = CreateMedicationRequest
 
 export interface UpdateMedicationStockRequest {
   add_quantity: number

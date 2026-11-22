@@ -16,11 +16,11 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useMedicationStore } from '@/store/useMedicationStore'
 import DashboardAuthGuard from '@/components/auth/DashboardAuthGuard'
@@ -30,10 +30,12 @@ import LoadingState from '@/components/common/StateViews/LoadingState'
 import { CreateMedicationModal } from '@/components/medications/CreateMedicationModal'
 import { RestockModal } from '@/components/medications/RestockModal'
 import { Medication } from '@/types'
+import { LabeledTextField } from '@/components/common/LabeledTextField'
 
 const TABLE_HEADERS = [
   'รหัส',
   'ชื่อยา / ชื่อสามัญ',
+  'ประเภท / คำเตือน',
   'หน่วย',
   'ราคาต่อหน่วย',
   'คงเหลือ',
@@ -43,7 +45,7 @@ const TABLE_HEADERS = [
 
 export default function MedicationsPage() {
   return (
-    <DashboardAuthGuard>
+    <DashboardAuthGuard allowedRoles={['admin', 'doctor', 'receptionist']}>
       <MedicationContent />
     </DashboardAuthGuard>
   )
@@ -56,6 +58,7 @@ function MedicationContent() {
   const [search, setSearch] = useState('')
   const [lowStockOnly, setLowStockOnly] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
+  const [editingMedication, setEditingMedication] = useState<Medication | null>(null)
   const [restock, setRestock] = useState<Medication | null>(null)
 
   useEffect(() => {
@@ -103,7 +106,7 @@ function MedicationContent() {
           <Button
             variant='contained'
             startIcon={<AddIcon />}
-            onClick={() => setCreateOpen(true)}
+            onClick={() => { setEditingMedication(null); setCreateOpen(true) }}
           >
             เพิ่มยา
           </Button>
@@ -122,7 +125,8 @@ function MedicationContent() {
           flexWrap: 'wrap',
         }}
       >
-        <TextField
+        <LabeledTextField
+          label='ค้นหายา'
           size='small'
           placeholder='ค้นหาชื่อยา หรือชื่อสามัญ'
           value={search}
@@ -187,6 +191,14 @@ function MedicationContent() {
                         {med.generic_name || '-'}
                       </Typography>
                     </TableCell>
+                    <TableCell>
+                      <Typography variant='body2'>{med.category || '-'}</Typography>
+                      {med.allergy_warnings && (
+                        <Typography variant='caption' color='error.main'>
+                          {med.allergy_warnings}
+                        </Typography>
+                      )}
+                    </TableCell>
                     <TableCell>{med.unit}</TableCell>
                     <TableCell>
                       {med.price_per_unit.toLocaleString()} ฿
@@ -200,6 +212,15 @@ function MedicationContent() {
                     </TableCell>
                     <TableCell>{med.min_stock_alert}</TableCell>
                     <TableCell>
+                      {canCreate && (
+                        <Button
+                          size='small'
+                          startIcon={<EditOutlinedIcon />}
+                          onClick={() => { setEditingMedication(med); setCreateOpen(true) }}
+                        >
+                          แก้ไข
+                        </Button>
+                      )}
                       {canRestock && (
                         <Button size='small' onClick={() => setRestock(med)}>
                           เติมสต็อก
@@ -219,8 +240,10 @@ function MedicationContent() {
         </Alert>
       )}
       <CreateMedicationModal
+        key={`${createOpen}-${editingMedication?.id ?? 'new'}`}
         open={createOpen}
-        onClose={() => setCreateOpen(false)}
+        medication={editingMedication}
+        onClose={() => { setCreateOpen(false); setEditingMedication(null) }}
       />
       <RestockModal medication={restock} onClose={() => setRestock(null)} />
     </Box>

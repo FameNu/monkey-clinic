@@ -4,6 +4,7 @@ import {
   MedicationCreatedResponse,
   MedicationListResponse,
   Medication,
+  UpdateMedicationRequest,
   UpdateMedicationStockRequest,
 } from '@/types'
 
@@ -23,6 +24,17 @@ export const medicationApi = () => {
     return response.data.medication
   }
 
+  const updateMedication = async (
+    id: string,
+    payload: UpdateMedicationRequest,
+  ): Promise<Medication> => {
+    const response = await apiClient.put<MedicationCreatedResponse>(
+      `/medications/${id}`,
+      payload,
+    )
+    return response.data.medication
+  }
+
   const restockMedication = async (
     id: string,
     payload: UpdateMedicationStockRequest,
@@ -33,6 +45,7 @@ export const medicationApi = () => {
   return {
     getMedications,
     createMedication,
+    updateMedication,
     restockMedication,
   }
 }
