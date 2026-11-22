@@ -1,11 +1,15 @@
 import { Medication } from './medication'
 
+export type AllergySeverity = 'mild' | 'moderate' | 'severe'
+export type Gender = 'male' | 'female'
+export type BloodType = 'A' | 'B' | 'AB' | 'O' | ''
+
 export interface PatientAllergy {
   id: string
   medication_id: string
   medication?: Medication
   reaction_note: string
-  severity: 'mild' | 'moderate' | 'severe'
+  severity: AllergySeverity
 }
 
 export interface Patient {
@@ -15,8 +19,24 @@ export interface Patient {
   full_name: string
   phone: string
   date_of_birth?: string
-  gender: 'male' | 'female'
-  blood_type?: 'A' | 'B' | 'AB' | 'O'
+  gender: Gender
+  blood_type?: BloodType
   chronic_diseases?: string
   allergies?: PatientAllergy[]
+}
+
+export interface CreatePatientPayload {
+  prefix: string
+  full_name: string
+  phone: string
+  date_of_birth?: string
+  gender: Gender
+  blood_type?: BloodType
+  chronic_diseases?: string
+}
+
+export interface AddPatientAllergyPayload {
+  medication_id: string
+  reaction_note: string
+  severity: AllergySeverity
 }
