@@ -1,4 +1,4 @@
-.PHONY: git-pull rm-latest-commit db-up db-down api-run api-tidy bruno-setup bruno-test
+.PHONY: git-pull rm-latest-commit db-up db-down db-reset api-run api-tidy bruno-setup bruno-test
 
 git-pull:
 	@echo "Fetching and pulling latest changes from remote repository..."
@@ -19,6 +19,12 @@ db-up:
 db-down:
 	@echo "Stopping the PostgreSQL database using Docker Compose..."
 	docker compose down db
+	@echo "Done!"
+
+db-reset:
+	@echo "Resetting the local PostgreSQL database and deleting its volume..."
+	docker compose down -v
+	docker compose up -d
 	@echo "Done!"
 
 api-run:
