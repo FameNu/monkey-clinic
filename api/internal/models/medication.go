@@ -9,4 +9,5 @@ type Medication struct {
 	PricePerUnit  float64 `gorm:"type:decimal(10,2);not null" json:"price_per_unit"`
 	StockQuantity int     `gorm:"not null;default:0" json:"stock_quantity"`
 	MinStockAlert int     `gorm:"not null;default:10" json:"min_stock_alert"`
+	Note          string  `gorm:"type:text" json:"note"`
 }

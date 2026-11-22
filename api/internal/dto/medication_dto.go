@@ -8,6 +8,7 @@ type CreateMedicationRequest struct {
 	PricePerUnit  float64 `json:"price_per_unit" validate:"min=0"`
 	StockQuantity int     `json:"stock_quantity" validate:"min=0"`
 	MinStockAlert int     `json:"min_stock_alert" validate:"min=0"`
+	Note          string  `gorm:"type:text" json:"note"`
 }
 
 type UpdateStockRequest struct {

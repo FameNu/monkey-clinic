@@ -67,6 +67,7 @@ func (h *MedicationHandler) CreateMedication(c *fiber.Ctx) error {
 		PricePerUnit:  req.PricePerUnit,
 		StockQuantity: req.StockQuantity,
 		MinStockAlert: req.MinStockAlert,
+		Note:          req.Note,
 	}
 
 	if err := h.db.Create(&med).Error; err != nil {
