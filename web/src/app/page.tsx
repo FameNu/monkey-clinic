@@ -16,7 +16,6 @@ import {
   Stack,
   Paper,
   Divider,
-  Avatar,
 } from '@mui/material'
 import {
   MedicalServices,
@@ -30,7 +29,6 @@ import {
   LocalHospital as LocalHospitalIcon,
   Star,
 } from '@mui/icons-material'
-// import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
 import { alpha, useTheme } from '@mui/material/styles'
 
 const SERVICES = [
