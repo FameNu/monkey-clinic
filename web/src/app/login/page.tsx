@@ -6,15 +6,30 @@ import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/useAuthStore'
 
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital'
-import { Alert, Box, Button, Card, CardContent, Container, FormControl, FormLabel, IconButton, InputAdornment, TextField, Typography } from '@mui/material'
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Container,
+  FormControl,
+  FormLabel,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 
 export default function LoginPage() {
   const router = useRouter()
-  const login = useAuthStore((state) => state.login)
-  const clearLoginError = useAuthStore((state) => state.clearLoginError)
-  const loading = useAuthStore((state) => state.isLoading)
-  const error = useAuthStore((state) => state.loginError)
+  const {
+    login,
+    clearLoginError,
+    isLoading: loading,
+    loginError: error,
+  } = useAuthStore()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
