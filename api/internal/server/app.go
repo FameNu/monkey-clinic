@@ -44,9 +44,9 @@ func New(db *gorm.DB) *fiber.App {
 	authHandler := handler.NewAuthHandler(db)
 	auth := api.Group("/auth")
 	auth.Post("/login", authHandler.Login)
-	auth.Get("/me", middleware.AuthRequired(), authHandler.GetMe)
+	auth.Get("/me", middleware.AuthRequired(db), authHandler.GetMe)
 
-	protected := api.Group("", middleware.AuthRequired())
+	protected := api.Group("", middleware.AuthRequired(db))
 	staffHandler := handler.NewStaffHandler(db)
 	patientHandler := handler.NewPatientHandler(db)
 	appointmentHandler := handler.NewAppointmentHandler(db)
@@ -55,33 +55,37 @@ func New(db *gorm.DB) *fiber.App {
 	invoiceHandler := handler.NewInvoiceHandler(db)
 	dashboardHandler := handler.NewDashboardHandler(db)
 
-	protected.Post("/users", middleware.RequireRoles("admin"), staffHandler.CreateUser)
+	protected.Get("/staff", middleware.RequireRoles("admin"), staffHandler.GetStaff)
+	protected.Post("/staff", middleware.RequireRoles("admin"), staffHandler.CreateStaff)
+	protected.Put("/staff/:id", middleware.RequireRoles("admin"), staffHandler.UpdateStaff)
 	protected.Post("/doctors", middleware.RequireRoles("admin"), staffHandler.CreateDoctor)
-	protected.Get("/doctors", staffHandler.GetDoctors)
+	protected.Get("/doctors", middleware.RequireRoles("admin", "receptionist", "doctor"), staffHandler.GetDoctors)
 	protected.Post("/doctors/:id/schedule", middleware.RequireRoles("admin"), staffHandler.AddDoctorSchedule)
 
 	protected.Post("/patients", middleware.RequireRoles("admin", "receptionist"), patientHandler.CreatePatient)
-	protected.Get("/patients", middleware.RequireRoles("admin", "receptionist"), patientHandler.GetPatients)
-	protected.Get("/patients/:id", middleware.RequireRoles("admin", "receptionist"), patientHandler.GetPatientByID)
+	protected.Get("/patients", middleware.RequireRoles("admin", "receptionist", "doctor"), patientHandler.GetPatients)
+	protected.Get("/patients/:id", middleware.RequireRoles("admin", "receptionist", "doctor"), patientHandler.GetPatientByID)
+	protected.Put("/patients/:id", middleware.RequireRoles("admin", "receptionist"), patientHandler.UpdatePatient)
 	protected.Post("/patients/:id/allergies", middleware.RequireRoles("admin", "doctor", "receptionist"), patientHandler.AddPatientAllergy)
 
 	protected.Post("/appointments", middleware.RequireRoles("admin", "receptionist"), appointmentHandler.CreateAppointment)
-	protected.Get("/appointments", appointmentHandler.GetAppointments)
-	protected.Get("/appointments/:id", appointmentHandler.GetAppointmentByID)
+	protected.Get("/appointments", middleware.RequireRoles("admin", "doctor", "receptionist"), appointmentHandler.GetAppointments)
+	protected.Get("/appointments/:id", middleware.RequireRoles("admin", "doctor", "receptionist"), appointmentHandler.GetAppointmentByID)
 	protected.Patch("/appointments/:id/status", middleware.RequireRoles("admin", "doctor", "receptionist"), appointmentHandler.UpdateStatus)
 
-	protected.Get("/medications", medicationHandler.GetMedications)
+	protected.Get("/medications", middleware.RequireRoles("admin", "doctor", "receptionist"), medicationHandler.GetMedications)
 	protected.Post("/medications", middleware.RequireRoles("admin"), medicationHandler.CreateMedication)
+	protected.Put("/medications/:id", middleware.RequireRoles("admin"), medicationHandler.UpdateMedication)
 	protected.Patch("/medications/:id/restock", middleware.RequireRoles("admin", "receptionist"), medicationHandler.RestockMedication)
 
 	protected.Post("/medical-records", middleware.RequireRoles("admin", "doctor"), clinicalHandler.CreateMedicalRecord)
-	protected.Get("/patients/:id/history", clinicalHandler.GetPatientHistory)
+	protected.Get("/patients/:id/history", middleware.RequireRoles("admin", "doctor"), clinicalHandler.GetPatientHistory)
 
-	protected.Get("/invoices", invoiceHandler.GetInvoices)
+	protected.Get("/invoices", middleware.RequireRoles("admin", "receptionist"), invoiceHandler.GetInvoices)
 	protected.Post("/invoices", middleware.RequireRoles("admin", "receptionist"), invoiceHandler.CreateInvoice)
 	protected.Patch("/invoices/:id/pay", middleware.RequireRoles("admin", "receptionist"), invoiceHandler.PayInvoice)
 
-	protected.Get("/dashboard/summary", dashboardHandler.GetSummary)
+	protected.Get("/dashboard/summary", middleware.RequireRoles("admin"), dashboardHandler.GetSummary)
 
 	return app
 }

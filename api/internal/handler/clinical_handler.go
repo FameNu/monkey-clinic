@@ -37,6 +37,12 @@ func (h *ClinicalHandler) CreateMedicalRecord(c *fiber.Ctx) error {
 		if err := tx.Preload("Patient.Allergies.Medication").First(&appointment, "id = ?", req.AppointmentID).Error; err != nil {
 			return fiber.NewError(fiber.StatusNotFound, "Appointment not found")
 		}
+		if c.Locals("role") == "doctor" {
+			doctorID, err := currentDoctorID(tx, c)
+			if err != nil || appointment.DoctorID != doctorID {
+				return fiber.NewError(fiber.StatusForbidden, "Doctors can only record examinations for their own appointments")
+			}
+		}
 		if appointment.Status == "cancelled" || appointment.Status == "no_show" {
 			return fiber.NewError(fiber.StatusBadRequest, "Cannot record examination for cancelled or no_show appointment")
 		}
@@ -144,13 +150,19 @@ func (h *ClinicalHandler) GetPatientHistory(c *fiber.Ctx) error {
 	}
 
 	var appointments []models.Appointment
-	err = h.db.
+	query := h.db.
 		Preload("Doctor").
 		Preload("MedicalRecord.Prescriptions.Medication").
 		Preload("Invoice").
-		Where("patient_id = ? AND status = ?", patientID, "completed").
-		Order("appointment_date desc, start_time desc").
-		Find(&appointments).Error
+		Where("patient_id = ? AND status = ?", patientID, "completed")
+	if c.Locals("role") == "doctor" {
+		doctorID, err := currentDoctorID(h.db, c)
+		if err != nil {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "error", "message": "Doctor profile is not linked to this account"})
+		}
+		query = query.Where("doctor_id = ?", doctorID)
+	}
+	err = query.Order("appointment_date desc, start_time desc").Find(&appointments).Error
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

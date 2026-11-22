@@ -115,6 +115,13 @@ func (h *AppointmentHandler) GetAppointments(c *fiber.Ctx) error {
 	if doctorID := c.Query("doctor_id"); doctorID != "" {
 		query = query.Where("doctor_id = ?", doctorID)
 	}
+	if c.Locals("role") == "doctor" {
+		doctorID, err := currentDoctorID(h.db, c)
+		if err != nil {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "error", "message": "Doctor profile is not linked to this account"})
+		}
+		query = query.Where("doctor_id = ?", doctorID)
+	}
 	if status := c.Query("status"); status != "" {
 		query = query.Where("status = ?", status)
 	}
@@ -139,7 +146,7 @@ func (h *AppointmentHandler) GetAppointmentByID(c *fiber.Ctx) error {
 	id, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Invalid appointment ID",
 		})
 	}
@@ -148,9 +155,15 @@ func (h *AppointmentHandler) GetAppointmentByID(c *fiber.Ctx) error {
 		Preload("MedicalRecord.Prescriptions.Medication").Preload("Invoice").
 		First(&appointment, "id = ?", id).Error; err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Appointment not found",
 		})
+	}
+	if c.Locals("role") == "doctor" {
+		doctorID, err := currentDoctorID(h.db, c)
+		if err != nil || appointment.DoctorID != doctorID {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "error", "message": "You can only access appointments assigned to you"})
+		}
 	}
 	return c.JSON(fiber.Map{
 		"status": "success",
@@ -181,6 +194,16 @@ func (h *AppointmentHandler) UpdateStatus(c *fiber.Ctx) error {
 		})
 	}
 
+	var appointment models.Appointment
+	if err := h.db.First(&appointment, "id = ?", id).Error; err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": "error", "message": "Appointment not found"})
+	}
+	if c.Locals("role") == "doctor" {
+		doctorID, err := currentDoctorID(h.db, c)
+		if err != nil || appointment.DoctorID != doctorID {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "error", "message": "You can only update appointments assigned to you"})
+		}
+	}
 	result := h.db.Model(&models.Appointment{}).Where("id = ?", id).Update("status", req.Status)
 	if result.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -199,4 +222,16 @@ func (h *AppointmentHandler) UpdateStatus(c *fiber.Ctx) error {
 		"status":  "success",
 		"message": "Appointment status updated",
 	})
+}
+
+func currentDoctorID(db *gorm.DB, c *fiber.Ctx) (uuid.UUID, error) {
+	userID, ok := c.Locals("user_id").(uuid.UUID)
+	if !ok {
+		return uuid.Nil, fiber.NewError(fiber.StatusUnauthorized, "Unauthorized")
+	}
+	var doctor models.Doctor
+	if err := db.Select("id").Where("user_id = ?", userID).First(&doctor).Error; err != nil {
+		return uuid.Nil, err
+	}
+	return doctor.ID, nil
 }
