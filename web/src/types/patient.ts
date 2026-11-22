@@ -40,3 +40,41 @@ export interface AddPatientAllergyPayload {
   reaction_note: string
   severity: AllergySeverity
 }
+
+export interface PrescriptionItem {
+  id: string
+  medical_record_id: string
+  medication_id: string
+  medication?: Medication
+  quantity: number
+  dosage_instruction: string
+  unit_price: number
+  created_at?: string
+  updated_at?: string
+}
+
+export interface MedicalRecord {
+  id: string
+  appointment_id: string
+  diagnosis: string
+  symptoms?: string
+  treatment_notes?: string
+  prescriptions?: PrescriptionItem[]
+  created_at?: string
+  updated_at?: string
+}
+
+export interface PrescriptionInput {
+  medication_id: string
+  quantity: number
+  dosage_instruction: string
+}
+
+export interface CreateMedicalRecordPayload {
+  appointment_id: string
+  diagnosis: string
+  symptoms?: string
+  treatment_notes?: string
+  prescriptions: PrescriptionInput[]
+  override_allergy_warning: boolean
+}

@@ -37,9 +37,17 @@ export const appointmentApi = () => {
     await apiClient.patch(`/appointments/${id}/status`, { status })
   }
 
+  const getAppointmentById = async (id: string): Promise<Appointment> => {
+    const response = await apiClient.get<{ data: Appointment }>(
+      `/appointments/${id}`,
+    )
+    return response.data.data
+  }
+
   return {
     getAppointments,
     createAppointment,
     updateAppointmentStatus,
+    getAppointmentById,
   }
 }

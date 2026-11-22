@@ -1,4 +1,4 @@
-import { Patient } from './patient'
+import { MedicalRecord, Patient } from './patient'
 import { Doctor } from './doctor'
 
 export type AppointmentStatus =
@@ -20,6 +20,7 @@ export interface Appointment {
   end_time: string // HH:MM
   status: AppointmentStatus
   reason: string
+  medical_record?: MedicalRecord
 }
 
 export interface DashboardSummary {
