@@ -102,7 +102,7 @@ function DashboardContent() {
     {
       title: 'คนไข้ในระบบทั้งหมด',
       value: `${summary.total_patients.toLocaleString()} ราย`,
-      icon: <PeopleAltOutlinedIcon color='secondary' fontSize='large' />,
+      icon: <PeopleAltOutlinedIcon color='primary' fontSize='large' />,
       bg: '#ccfbf1',
     },
     {
