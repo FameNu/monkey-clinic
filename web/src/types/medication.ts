@@ -7,6 +7,7 @@ export interface Medication {
   price_per_unit: number
   stock_quantity: number
   min_stock_alert: number
+  note?: string
 }
 
 export interface CreateMedicationRequest {
@@ -17,6 +18,7 @@ export interface CreateMedicationRequest {
   price_per_unit: number
   stock_quantity: number
   min_stock_alert: number
+  note?: string
 }
 
 export interface UpdateMedicationStockRequest {
