@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/FameNu/clinic-management-system/api/internal/dto"
 	"github.com/FameNu/clinic-management-system/api/internal/models"
@@ -34,7 +35,7 @@ func (h *ClinicalHandler) CreateMedicalRecord(c *fiber.Ctx) error {
 	err := h.db.Transaction(func(tx *gorm.DB) error {
 		// 1. ดึงข้อมูลนัดหมายพร้อมประวัติแพ้ยาของคนไข้
 		var appointment models.Appointment
-		if err := tx.Preload("Patient.Allergies").First(&appointment, "id = ?", req.AppointmentID).Error; err != nil {
+		if err := tx.Preload("Patient.Allergies.Medication").First(&appointment, "id = ?", req.AppointmentID).Error; err != nil {
 			return fiber.NewError(fiber.StatusNotFound, "Appointment not found")
 		}
 		if appointment.Status == "cancelled" || appointment.Status == "no_show" {
@@ -44,8 +45,12 @@ func (h *ClinicalHandler) CreateMedicalRecord(c *fiber.Ctx) error {
 		// Key: MedicationID, Value: PatientAllergy
 		// Create a map of the patient's allergies for quick lookup [O(1)]
 		allergyMap := make(map[uuid.UUID]models.PatientAllergy)
+		allergyGenerics := make(map[string]models.PatientAllergy)
 		for _, a := range appointment.Patient.Allergies {
 			allergyMap[a.MedicationID] = a
+			if generic := strings.ToLower(strings.TrimSpace(a.Medication.GenericName)); generic != "" {
+				allergyGenerics[generic] = a
+			}
 		}
 
 		record := models.MedicalRecord{
@@ -65,7 +70,11 @@ func (h *ClinicalHandler) CreateMedicalRecord(c *fiber.Ctx) error {
 				return fiber.NewError(fiber.StatusNotFound, fmt.Sprintf("Medication %s not found", item.MedicationID))
 			}
 
-			if allergy, isAllergic := allergyMap[med.ID]; isAllergic && !req.OverrideAllergyWarning {
+			allergy, isAllergic := allergyMap[med.ID]
+			if !isAllergic {
+				allergy, isAllergic = allergyGenerics[strings.ToLower(strings.TrimSpace(med.GenericName))]
+			}
+			if isAllergic && !req.OverrideAllergyWarning {
 				return fiber.NewError(
 					fiber.StatusConflict,
 					fmt.Sprintf("ALLERGY ALERT: Patient is allergic to %s (Severity: %s, Note: %s). Set override_allergy_warning=true to proceed.",
@@ -114,7 +123,7 @@ func (h *ClinicalHandler) CreateMedicalRecord(c *fiber.Ctx) error {
 			return c.Status(fiberErr.Code).JSON(fiber.Map{"status": "error", "message": fiberErr.Message})
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Failed to save medical record",
 		})
 	}
@@ -122,7 +131,7 @@ func (h *ClinicalHandler) CreateMedicalRecord(c *fiber.Ctx) error {
 	h.db.Preload("Prescriptions.Medication").First(&createdRecord, "id = ?", createdRecord.ID)
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"status": "success",
-		"data": createdRecord,
+		"data":   createdRecord,
 	})
 }
 
@@ -130,7 +139,7 @@ func (h *ClinicalHandler) GetPatientHistory(c *fiber.Ctx) error {
 	patientID, err := uuid.Parse(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Invalid patient ID",
 		})
 	}
@@ -146,13 +155,13 @@ func (h *ClinicalHandler) GetPatientHistory(c *fiber.Ctx) error {
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"status": "error",
+			"status":  "error",
 			"message": "Failed to fetch medical history",
 		})
 	}
 
 	return c.JSON(fiber.Map{
 		"status": "success",
-		"data": appointments,
+		"data":   appointments,
 	})
 }
