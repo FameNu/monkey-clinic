@@ -289,6 +289,12 @@ export function PrescriptionBuilder({
                   </IconButton>
                 </Box>
 
+                {selectedMed?.allergy_warnings && (
+                  <Alert severity='warning' sx={{ mt: 1 }}>
+                    {selectedMed.allergy_warnings}
+                  </Alert>
+                )}
+
                 <LabeledTextField
                   label='วิธีรับประทาน / คำแนะนำการใช้ยา'
                   size='small'
