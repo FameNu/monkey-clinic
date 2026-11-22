@@ -231,7 +231,7 @@ function AppointmentsContent() {
                 <TableCell sx={{ fontWeight: 700 }}>แพทย์ผู้ตรวจ</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>อาการเบื้องต้น</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>สถานะ</TableCell>
-                <TableCell sx={{ fontWeight: 700 }} align='right'>
+                <TableCell sx={{ fontWeight: 700 }}>
                   การจัดการ
                 </TableCell>
               </TableRow>
@@ -270,8 +270,8 @@ function AppointmentsContent() {
                     <Stack
                       direction='row'
                       sx={{
-                        spacing: 1,
-                        justifyContent: 'flex-end',
+                        gap: 1,
+                        justifyContent: 'space-between',
                       }}
                     >
                       {canManageQueue && appt.status === 'scheduled' && (
