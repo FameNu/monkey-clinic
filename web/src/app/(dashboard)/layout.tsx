@@ -65,6 +65,12 @@ const NAV_ITEMS: NavItem[] = [
     roles: ['admin', 'receptionist', 'doctor'],
   },
   {
+    label: 'จัดการแพทย์',
+    href: '/doctors',
+    icon: <LocalHospitalIcon />,
+    roles: ['admin', 'receptionist', 'doctor'],
+  },
+  {
     label: 'คลังยาและเวชภัณฑ์',
     href: '/medications',
     icon: <MedicationOutlinedIcon />,
