@@ -13,14 +13,15 @@ import {
 } from '@mui/material'
 import { LabeledTextField } from '@/components/common/LabeledTextField'
 import { usePatientStore } from '@/store/usePatientStore'
+import { BLOOD_TYPES, PREFIX_OPTIONS } from '@/common/selectionList'
 
 interface Props {
   open: boolean
   onClose: () => void
 }
 
-const PREFIX_OPTIONS = ['นาย', 'นาง', 'นางสาว', 'ด.ช.', 'ด.ญ.']
-const BLOOD_TYPES = ['A', 'B', 'AB', 'O'] as const
+// const PREFIX_OPTIONS = ['นาย', 'นาง', 'นางสาว', 'ด.ช.', 'ด.ญ.']
+// const BLOOD_TYPES = ['A', 'B', 'AB', 'O'] as const
 
 export default function CreatePatientModal({ open, onClose }: Props) {
   const { createPatient, isSubmitting } = usePatientStore()
@@ -76,7 +77,7 @@ export default function CreatePatientModal({ open, onClose }: Props) {
     <Dialog
       open={open}
       onClose={handleClose}
-      maxWidth='sm'
+      maxWidth='md'
       fullWidth
       slotProps={{
         transition: {

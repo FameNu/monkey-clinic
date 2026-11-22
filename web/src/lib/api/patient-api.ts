@@ -5,6 +5,7 @@ import {
   PatientAllergy,
   CreatePatientPayload,
   AddPatientAllergyPayload,
+  UpdatePatientPayload,
 } from '@/types'
 
 export const patientApi = () => {
@@ -21,7 +22,9 @@ export const patientApi = () => {
   }
 
   const getPatientById = async (id: string): Promise<Patient> => {
-    const response = await apiClient.get<ApiResponse<Patient>>(`/patients/${id}`)
+    const response = await apiClient.get<ApiResponse<Patient>>(
+      `/patients/${id}`,
+    )
     return response.data.data
   }
 
@@ -30,6 +33,17 @@ export const patientApi = () => {
   ): Promise<Patient> => {
     const response = await apiClient.post<ApiResponse<Patient>>(
       '/patients',
+      payload,
+    )
+    return response.data.data
+  }
+
+  const updatePatient = async (
+    id: string,
+    payload: UpdatePatientPayload,
+  ): Promise<Patient> => {
+    const response = await apiClient.put<ApiResponse<Patient>>(
+      `/patients/${id}`,
       payload,
     )
     return response.data.data
@@ -50,6 +64,7 @@ export const patientApi = () => {
     getPatients,
     getPatientById,
     createPatient,
+    updatePatient,
     addPatientAllergy,
   }
 }

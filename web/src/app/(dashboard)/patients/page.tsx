@@ -19,6 +19,7 @@ import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1'
 import SearchIcon from '@mui/icons-material/Search'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { useAuthStore } from '@/store/useAuthStore'
 import { usePatientStore } from '@/store/usePatientStore'
 import { Patient } from '@/types'
@@ -28,8 +29,18 @@ import LoadingState from '@/components/common/StateViews/LoadingState'
 import CreatePatientModal from '@/components/patients/CreatePatientModal'
 import PatientDetailDrawer from '@/components/patients/PatientDetailDrawer'
 import { LabeledTextField } from '@/components/common/LabeledTextField'
+import { EditPatientModal } from '@/components/patients/EditPatientModal'
+import DashboardAuthGuard from '@/components/auth/DashboardAuthGuard'
 
 export default function PatientsPage() {
+  return (
+    <DashboardAuthGuard allowedRoles={['admin', 'doctor', 'receptionist']}>
+      <PatientsContent />
+    </DashboardAuthGuard>
+  )
+}
+
+function PatientsContent() {
   const { user } = useAuthStore()
   const { patients, isLoading, error, fetchPatients } = usePatientStore()
 
@@ -37,6 +48,7 @@ export default function PatientsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [openCreateModal, setOpenCreateModal] = useState(false)
   const [activePatientId, setActivePatientId] = useState<string | null>(null)
+  const [patientToEdit, setPatientToEdit] = useState<Patient | null>(null)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -62,6 +74,7 @@ export default function PatientsPage() {
     user?.role === 'doctor' ||
     user?.role === 'admin' ||
     user?.role === 'receptionist'
+  const canEditPatient = user?.role === 'admin' || user?.role === 'receptionist'
 
   return (
     <Box>
@@ -160,7 +173,7 @@ export default function PatientsPage() {
                 <TableCell sx={{ fontWeight: 700 }}>เพศ / กรุ๊ปเลือด</TableCell>
                 <TableCell sx={{ fontWeight: 700 }}>ประวัติแพ้ยา</TableCell>
                 <TableCell sx={{ fontWeight: 700 }} align='right'>
-                  รายละเอียด
+                  จัดการ
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -199,6 +212,16 @@ export default function PatientsPage() {
                       )}
                     </TableCell>
                     <TableCell align='right'>
+                      {canEditPatient && (
+                        <Button
+                          size='small'
+                          startIcon={<EditOutlinedIcon />}
+                          onClick={() => setPatientToEdit(patient)}
+                          sx={{ mr: 1 }}
+                        >
+                          แก้ไข
+                        </Button>
+                      )}
                       <Button
                         size='small'
                         variant='outlined'
@@ -225,6 +248,12 @@ export default function PatientsPage() {
         patient={activePatient}
         onClose={() => setActivePatientId(null)}
         canEditAllergy={canEditAllergy}
+      />
+      <EditPatientModal
+        key={patientToEdit?.id ?? 'closed'}
+        patient={patientToEdit}
+        open={Boolean(patientToEdit)}
+        onClose={() => setPatientToEdit(null)}
       />
     </Box>
   )

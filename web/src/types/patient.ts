@@ -17,7 +17,10 @@ export interface Patient {
   hn_code: string
   prefix: string
   full_name: string
+  national_id?: string | null
   phone: string
+  address?: string
+  emergency_contact?: string
   date_of_birth?: string
   gender: Gender
   blood_type?: BloodType
@@ -28,11 +31,18 @@ export interface Patient {
 export interface CreatePatientPayload {
   prefix: string
   full_name: string
+  national_id?: string
   phone: string
+  address?: string
+  emergency_contact?: string
   date_of_birth?: string
   gender: Gender
   blood_type?: BloodType
   chronic_diseases?: string
+}
+
+export interface UpdatePatientPayload extends CreatePatientPayload {
+  allergies: AddPatientAllergyPayload[]
 }
 
 export interface AddPatientAllergyPayload {

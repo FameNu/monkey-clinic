@@ -4,6 +4,7 @@ import {
   Patient,
   AddPatientAllergyPayload,
   CreatePatientPayload,
+  UpdatePatientPayload,
 } from '@/types'
 import { patientApi } from '@/lib/api/patient-api'
 import { medicationApi } from '@/lib/api/medication-api'
@@ -24,6 +25,7 @@ type PatientActions = {
   fetchPatientById: (id: string) => Promise<void>
   fetchMedicationOptions: () => Promise<void>
   createPatient: (payload: CreatePatientPayload) => Promise<Patient>
+  updatePatient: (id: string, payload: UpdatePatientPayload) => Promise<Patient>
   addPatientAllergy: (
     patientId: string,
     payload: AddPatientAllergyPayload,
@@ -32,8 +34,13 @@ type PatientActions = {
   reset: () => void
 }
 
-const { getPatients, getPatientById, createPatient, addPatientAllergy } =
-  patientApi()
+const {
+  getPatients,
+  getPatientById,
+  createPatient,
+  updatePatient,
+  addPatientAllergy,
+} = patientApi()
 const { getMedications } = medicationApi()
 
 export const usePatientStore = create<PatientState & PatientActions>()(
@@ -100,6 +107,25 @@ export const usePatientStore = create<PatientState & PatientActions>()(
             'ลงทะเบียนคนไข้ใหม่ไม่สำเร็จ กรุณาตรวจสอบข้อมูล',
           ),
         )
+      }
+    },
+
+    updatePatient: async (id, payload) => {
+      set({ isSubmitting: true })
+      try {
+        const updated = await updatePatient(id, payload)
+        set((state) => ({
+          selectedPatient:
+            state.selectedPatient?.id === id ? updated : state.selectedPatient,
+          patients: state.patients.map((patient) =>
+            patient.id === id ? updated : patient,
+          ),
+          isSubmitting: false,
+        }))
+        return updated
+      } catch (error) {
+        set({ isSubmitting: false })
+        throw new Error(getErrorMessage(error, 'แก้ไขข้อมูลคนไข้ไม่สำเร็จ'))
       }
     },
 
