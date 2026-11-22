@@ -31,10 +31,7 @@ export function CreateAppointmentModal({
   onSuccess,
   defaultDate,
 }: Props) {
-  const createAppointment = useAppointmentStore(
-    (state) => state.createAppointment,
-  )
-  const { isSubmitting } = useAppointmentStore()
+  const { isSubmitting, createAppointment } = useAppointmentStore()
 
   const { patients, fetchPatients } = usePatientStore()
   const { doctors, fetchDoctors } = useDoctorStore()

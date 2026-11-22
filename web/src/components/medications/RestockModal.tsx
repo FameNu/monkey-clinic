@@ -17,11 +17,13 @@ interface Props {
   medication: Medication | null
   onClose: () => void
 }
+
 export function RestockModal({ medication, onClose }: Props) {
-  const updateStock = useMedicationStore((state) => state.updateStock)
-  const isSubmitting = useMedicationStore((state) => state.isSubmitting)
+  const { updateStock, isSubmitting } = useMedicationStore()
+
   const [quantity, setQuantity] = useState(1)
   const [error, setError] = useState<string | null>(null)
+
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (!medication) return
@@ -34,6 +36,7 @@ export function RestockModal({ medication, onClose }: Props) {
       setError(reason instanceof Error ? reason.message : 'ปรับสต็อกไม่สำเร็จ')
     }
   }
+
   return (
     <Dialog
       open={Boolean(medication)}

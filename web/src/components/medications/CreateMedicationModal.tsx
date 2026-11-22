@@ -30,10 +30,13 @@ const initial: CreateMedicationRequest = {
 }
 
 export function CreateMedicationModal({ open, onClose }: Props) {
-  const createMedication = useMedicationStore((state) => state.createMedication)
-  const isSubmitting = useMedicationStore((state) => state.isSubmitting)
+  // const createMedication = useMedicationStore((state) => state.createMedication)
+  // const isSubmitting = useMedicationStore((state) => state.isSubmitting)
+  const { createMedication, isSubmitting } = useMedicationStore()
+
   const [payload, setPayload] = useState(initial)
   const [error, setError] = useState<string | null>(null)
+
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     setError(null)
@@ -45,6 +48,7 @@ export function CreateMedicationModal({ open, onClose }: Props) {
       setError(reason instanceof Error ? reason.message : 'เพิ่มยาไม่สำเร็จ')
     }
   }
+  
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
       <form onSubmit={submit}>
