@@ -1,4 +1,4 @@
-.PHONY: git-pull rm-latest-commit db-up db-down db-reset api-run api-tidy bruno-setup bruno-test
+.PHONY: git-pull rm-latest-commit db-up db-down db-reset seed api-run api-tidy bruno-setup bruno-test
 
 git-pull:
 	@echo "Fetching and pulling latest changes from remote repository..."
@@ -26,6 +26,9 @@ db-reset:
 	docker compose down -v
 	docker compose up -d
 	@echo "Done!"
+
+seed:
+	cd api && APP_ENV=development go run ./cmd/seed
 
 api-run:
 	@echo "Starting Go Fiber API..."
